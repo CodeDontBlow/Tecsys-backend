@@ -8,9 +8,6 @@ Backend em **FastAPI** para processamento de PDFs, OCR, web scraping e integraç
 
 * **Python**: >=3.9, recomendado 3.9 a 3.13
 * **Poetry**: >=2.0
-
-> Testado no Windows 10/11 e Linux.
-
 ---
 
 ## Passo a passo para rodar o projeto
