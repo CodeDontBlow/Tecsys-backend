@@ -13,7 +13,6 @@ def test_fetch_ncm_creates_csv(tmp_path):
         ]
     }
 
-
     with patch("app.util.ncm.requests.get") as mock_get:
         mock_get.return_value = Mock() 
         mock_get.return_value.json.return_value = fake_response 

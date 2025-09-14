@@ -8,7 +8,7 @@ logging.basicConfig(level=logging.INFO, format='%(levelname)s - %(message)s')
 
 def fetch_ncm_data(
     url: str = "https://portalunico.siscomex.gov.br/classif/api/publico/nomenclatura/download/json",
-    output_csv: str = "data/ncm_chapter_85.csv",
+    output_csv: str = "app/data/ncm_chapter_85.csv",
     filter_number: str = "85",
 ) -> None:
     

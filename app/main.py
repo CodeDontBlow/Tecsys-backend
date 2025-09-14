@@ -1,6 +1,4 @@
 from fastapi import FastAPI
-
-
 from app.core.settings import settings
 
 
