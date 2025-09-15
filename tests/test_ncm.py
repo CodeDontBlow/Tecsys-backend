@@ -1,5 +1,5 @@
 from unittest.mock import patch, Mock
-from app.util.ncm import fetch_ncm_data
+from app.db.chroma_db.data_csv.tipi import fetch_ncm_data
 import pandas as pd
 
 def test_fetch_ncm_creates_csv(tmp_path):

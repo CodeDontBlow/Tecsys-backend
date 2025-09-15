@@ -1,1 +1,0 @@
-from .ncm import fetch_ncm_data
