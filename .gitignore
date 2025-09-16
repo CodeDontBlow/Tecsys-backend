@@ -151,7 +151,8 @@ env-embedding
 
 # Rope project settings
 .ropeproject
-
+tests\exemplo_pdf_entrada.pdf
+exemplo_pdf_entrada.pdf
 # mkdocs documentation
 /site
 
