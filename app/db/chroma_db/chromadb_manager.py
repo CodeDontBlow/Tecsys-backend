@@ -1,7 +1,7 @@
 from app.db.chroma_db.config import CHROMA_DB_PATH, COLLECTION_NAME, CSV_PATH
 from app.db.chroma_db.embedding import get_embedding_ollama
-from app.db.chroma_db.query_process import detect_query_category, translate_electronics_terms
 from app.db.chroma_db.model import NCMResult, Response
+from app.db.chroma_db.query_process import formated_query
 import chromadb
 import pandas as pd
 import uuid
@@ -51,7 +51,6 @@ class ChromaDBManager:
             metadatas.append({
                 "codigo_ncm": code_ncm,
                 "descricao_original": description,
-                "categoria": detect_query_category(description)
             })
         
         self.collection.add(
@@ -64,10 +63,8 @@ class ChromaDBManager:
 
     def search_ncm(self, query: str, n_results: int) -> Response:
         try:
-            category = detect_query_category(query)
-            query_translated = translate_electronics_terms(query)
-            query_for_embedding = f"{query_translated} categoria:{category}"
-
+            query_for_embedding = formated_query(query) 
+            
             results = self.collection.query(
                 query_texts=[query_for_embedding], 
                 n_results=n_results,

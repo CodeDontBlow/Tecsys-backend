@@ -1,45 +1,45 @@
-def translate_electronics_terms(query: str) -> str:
-    translation_map = {
-        "capacitor": "capacitor", "ceramic": "cerâmica", "electrolytic": "eletrolítico",
-        "aluminum": "alumínio", "multilayer": "multicamada", "radial": "radial",
-        "smd": "montagem em superfície", "axial": "axial", "voltage": "tensão",
-        "capacitance": "capacitância", "tolerance": "tolerância", "hours": "horas",
-        "resistor": "resistor", "ohm": "ohm", "watt": "watt", "precision": "precisão",
-        "component": "componente", "electronic": "eletrônico", "metric": "métrico",
-    }
-    
-    new_query = query.lower()
-    for eng, por in translation_map.items():
-        if eng in new_query:
-            new_query += f" {por}"    
-    return new_query
-
-
-def format_query_for_ncm(query: str) -> str:
-    translated_query = translate_electronics_terms(query)
-    
-    return f"""
-    Buscar classificação fiscal NCM para componente eletrônico: {translated_query}
-    Categoria: Capacitores Resistores Diodos Transistores Circuitos Integrados
-    Tipo: Eletrônico Semicondutor Dispositivo Eletrônico
-    Aplicação: Importação Classificação Fiscal NCM
+def formated_query(query: str) -> str:
     """
-
-def detect_query_category(query: str) -> str:
-    query_lower = query.lower()
-
-    category_list = {
-        "capacitor": {"capacitor", "cap", "uf", "μf", "pf"},
-        "resistor": {"resistor", "res", "ohm", "kohm", "mohm"},
-        "diodo": {"diode", "diodo", "led", "zener"},
-        "transistor": {"transistor", "fet", "mosfet", "bjt"},
-        "circuito integrado": {"ic", "circuit", "integrated", "chip"},
+    Recebe uma descrição e retorna uma query enriquecida para embedding,
+    incluindo termos-chave detectados em diferentes categorias.
+    """
+    termos_chave = {
+        "geral": ["outros", "aparelhos", "elétricos", "superior", "inferior", "tipo", "mesmo",
+                  "montados", "incluindo", "exceto", "partes", "montagem", "do", "uma", "que"],
+        "eletronicos": ["diodo", "led", "circuito", "transistor", "resistencia", "condensador",
+                        "capacitor", "semicondutor", "dispositivo", "integrado", "memoria",
+                        "eprom", "eeprom", "flash", "smd", "chipset", "driver", "controlador",
+                        "sensor", "microfone", "altofalante", "amplificador", "receptor", "transmissor"],
+        "eletricos": ["motor", "gerador", "transformador", "bobina", "tubo", "pilha", "bateria",
+                      "fusivel", "disjuntor", "condutor", "cabo", "conector", "painel", "chave",
+                      "interruptor", "lampada"],
+        "comunicacao": ["televisao", "radio", "telefone", "antena", "modem", "roteador", "hub",
+                        "switch", "sinal", "repetidor", "satelite", "transmissao"],
+        "medidas": ["v", "kw", "kva", "w", "cm", "mm", "hz", "ghz", "m", "ah", "kg", "lux", "khz", "nm"],
+        "materiais": ["cobre", "ferro", "aluminio", "plastico", "vidro", "ceramica", "resina",
+                      "cadmio", "chumbo", "mercurio", "policlorobifenilas", "tantalo"],
+        "outras_funcoes": ["aquecimento", "iluminacao", "ar", "refrigeracao", "energia", "controle",
+                           "processamento", "armazenamento", "visualizacao", "captura", "deteccao",
+                           "regulacao", "protecao", "isolante", "conexao", "suporte", "medicao",
+                           "conversores"]
     }
 
-    for category, keywords in category_list.items():
-        if any(key in query_lower for key in keywords):
-            return category
-    return "eletronico_geral"
+    words = query.lower().replace(",", " ").replace("(", " ").replace(")", " ").split()
+    detected_terms = []
+
+    for cat_terms in termos_chave.values():
+        for term in cat_terms:
+            if term in words:
+                detected_terms.append(term)
+
+    # Retorna a query original + todos os termos-chave detectados
+    return query + " " + " ".join(detected_terms)
+
+
+
+
+
+
 
 
 
