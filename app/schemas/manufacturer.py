@@ -1,0 +1,13 @@
+from pydantic import BaseModel, Field
+from typing import Annotated
+
+
+class BaseManufacturer(BaseModel):
+    name: Annotated[str, Field(title="Manufacturer Name", description="Name of the manufacturer", examples="Manufacturer ABC")]
+    origin_country: Annotated[str, Field(title="Manufacturer Name", description="Name of the manufacturer", examples="Manufacturer ABC")]
+    address: Annotated[str, Field(title="Manufacturer Address", description="Address of the manufacturer", examples="1234 Industrial Rd, City, Country")]
+
+    model_config = {
+        "extra": "forbid",
+        "str_strip_whitespace": True,
+    }
