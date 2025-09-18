@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
 
-from app.core.settings import settings
+from app.core.config import settings
 
 
 class App(FastAPI):
@@ -13,6 +13,6 @@ class App(FastAPI):
             title=settings.PROJECT_NAME,
             root_path=settings.ROOT_PATH
         )
-    
+
 
 app = App()
