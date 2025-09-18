@@ -1,8 +1,5 @@
 from fastapi import FastAPI
-
-
 from app.core.settings import settings
-
 
 class App(FastAPI):
     def __init__(self, *args, **kwargs) -> None:
