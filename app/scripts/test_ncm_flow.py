@@ -1,4 +1,4 @@
-from app.db.chroma_db.data.tipi import fetch_ncm_data
+from app.db.chroma_db.tipi import fetch_ncm_data
 from app.db.chroma_db.chromadb_manager import chroma_manager
 from app.db.chroma_db.model import Response
 
@@ -14,9 +14,8 @@ fake_descriptions = [
     "Sensor de luz ambiente, infravermelho, analógico, solda, tensão de operação 2,5 a 5,5 V",
     "Transdutor de áudio eletromagnético, 1,5 Vp-p, 10 mA, pino 1 Vp-p, 1548 Hz a 2548 Hz, through-hole", 
     "Retificador padrão, 400 V, 1,0 A",  
-    "Driver de gate, 1 canal, isolado, high side, IGBT, MOSFET Si e SiC, 8 pinos, DSO"  #
+    "Driver de gate, 1 canal, isolado, high side, IGBT, MOSFET Si e SiC, 8 pinos, DSO" 
 ]
-
 
 chroma_manager.populate_from_csv()
 

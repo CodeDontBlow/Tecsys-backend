@@ -32,7 +32,6 @@ def formated_query(query: str) -> str:
             if term in words:
                 detected_terms.append(term)
 
-    # Retorna a query original + todos os termos-chave detectados
     return query + " " + " ".join(detected_terms)
 
 
