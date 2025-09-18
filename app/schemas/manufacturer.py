@@ -3,6 +3,7 @@ from typing import Annotated
 
 
 class BaseManufacturer(BaseModel):
+    '''Base schema for manufacturer information'''
     name: Annotated[str, Field(title="Manufacturer Name", description="Name of the manufacturer", examples="Manufacturer ABC")]
     origin_country: Annotated[str, Field(title="Manufacturer Name", description="Name of the manufacturer", examples="Manufacturer ABC")]
     address: Annotated[str, Field(title="Manufacturer Address", description="Address of the manufacturer", examples="1234 Industrial Rd, City, Country")]
