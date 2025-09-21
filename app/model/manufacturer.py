@@ -1,8 +1,10 @@
 from sqlalchemy import Integer, String
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column
+
+from app.model.base import Base
 
 
-class Manufacturer(DeclarativeBase):
+class Manufacturer(Base):
     """Model for the Manufacturers table."""
     __tablename__ = "manufacturers"
 

@@ -1,8 +1,10 @@
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import String, Integer
 
+from app.model.base import Base
 
-class Supplyer(DeclarativeBase):
+
+class Supplyer(Base):
     """Model for suppliers table."""
     __tablename__ = "suppliers"
 

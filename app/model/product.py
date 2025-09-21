@@ -1,8 +1,10 @@
 from sqlalchemy import String
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from app.model.base import Base
 
 
-class Product(DeclarativeBase):
+class Product(Base):
     """Model for the products table."""
     __tablename__ = "products"
 
