@@ -1,9 +1,13 @@
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-from sqlalchemy import String
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy import String, Integer
 
 
 class Supplyer(DeclarativeBase):
-    __tablename__ = "supplyers"
+    """Model for suppliers table."""
+    __tablename__ = "suppliers"
 
-    part_number: Mapped[str] = mapped_column(String(20), primary_key=True, unique=True, nullable=False)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    part_number: Mapped[str] = mapped_column(String(20), nullable=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
+
+    supplyer_products: Mapped[list["SupplyerProduct"]] = relationship("SupplyerProduct", back_populates="suppliers")

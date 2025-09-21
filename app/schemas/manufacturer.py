@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field
 from typing import Annotated
 
 
-class BaseManufacturer(BaseModel):
+class ManufacturerBase(BaseModel):
     '''Base schema for manufacturer information'''
     name: Annotated[str, Field(title="Manufacturer Name", description="Name of the manufacturer", examples="Manufacturer ABC")]
     origin_country: Annotated[str, Field(title="Manufacturer Name", description="Name of the manufacturer", examples="Manufacturer ABC")]
@@ -11,4 +11,5 @@ class BaseManufacturer(BaseModel):
     model_config = {
         "extra": "forbid",
         "str_strip_whitespace": True,
+        "orm_mode": True,
     }

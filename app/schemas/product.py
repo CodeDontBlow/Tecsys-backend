@@ -11,6 +11,7 @@ class ProductBase(BaseModel):
     model_config = {
         "extra": "forbid",
         "str_strip_whitespace": True,
+        "orm_mode": True,
     }
 
 

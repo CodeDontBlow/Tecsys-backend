@@ -3,6 +3,7 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
 class Manufacturer(DeclarativeBase):
+    """Model for the Manufacturers table."""
     __tablename__ = "manufacturers"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
