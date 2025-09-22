@@ -11,8 +11,3 @@ def get_embedding_ollama() -> OllamaEmbeddingFunction:
     logger.info(f"Inicializando OllamaEmbeddingFunction | URL={ollama_url}, Modelo={embedding_model}")
     
     return OllamaEmbeddingFunction(url=ollama_url, model_name=embedding_model)
-
-
-
-
-    

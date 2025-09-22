@@ -1,7 +1,7 @@
 from app.db.chroma_db.config import CHROMA_DB_PATH, COLLECTION_NAME, CSV_PATH
 from app.db.chroma_db.embedding import get_embedding_ollama
 from app.db.chroma_db.model import NCMResult, Response
-from app.db.chroma_db.query_process import formated_query
+from app.util.text_processing import formated_query
 import chromadb
 import pandas as pd
 import uuid
@@ -61,29 +61,26 @@ class ChromaDBManager:
         logger.info(f"Collection populated with {len(df)} items!")
 
 
-    def search_ncm(self, query: str, n_results: int) -> Response:
+    def search_ncm(self, query: str) -> Response:
         try:
             query_for_embedding = formated_query(query) 
             
             results = self.collection.query(
                 query_texts=[query_for_embedding], 
-                n_results=n_results,
+                n_results=1,
             )
-            ncm_results = []
 
-            for i in range(len(results['documents'][0])):
-                ncm_results.append(NCMResult(
-                    ncm_code=results['metadatas'][0][i]['codigo_ncm'],
-                    description=results['documents'][0][i],
-                    distance=results['distances'][0][i]
-                ))
+            first_result = NCMResult(
+                ncm_code=results['metadatas'][0][0]['codigo_ncm'],
+                description=results['documents'][0][0],
+                distance=results['distances'][0][0]
+            )
 
-            return Response(query=query, result=ncm_results)
+            return Response(query=query, result=first_result)
 
         except Exception as e:
             logger.error(f"Error to search: {e}")
-            return Response(query=query, result=[])
+            return Response(query=query, result=None)
     
-
 chroma_manager = ChromaDBManager()
         

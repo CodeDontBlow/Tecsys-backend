@@ -1,4 +1,4 @@
-CSV_PATH = "app/db/chroma_db/ncm_chapter_85.csv"
+CSV_PATH = "app/data/ncm_chapter_85.csv"
 
 CHROMA_DB_PATH = "app/db/chroma_db/collection"
 COLLECTION_NAME = "ncm_85_collection"
