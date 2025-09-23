@@ -1,3 +1,4 @@
+# VSCode
 .vscode/
 __pycache__/
 *.pyc
@@ -7,4 +8,24 @@ __pycache__/
 ncm_chapter_85.csv
 
 #collection chromadb
-collection
+collection/
+
+# Environment
+.env
+
+# Python cache
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+.env
+
+# Logs
+*.log
+
+# Poetry
+.poetry/
