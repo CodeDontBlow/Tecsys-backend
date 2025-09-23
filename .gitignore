@@ -1,1 +1,22 @@
-.vscode
+# VSCode
+.vscode/
+
+# Environment
+.env
+
+# Python cache
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+.env
+
+# Logs
+*.log
+
+# Poetry
+.poetry/
