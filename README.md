@@ -124,19 +124,54 @@ alembic upgrade head
 ---
 
 ### 5. Rodar o projeto
+```env
+DATABASE_URL=sqlite:///./db.sqlite3
+```
+
+---
+
+### 9. Setup inicial
+Antes de rodar a API pela primeira vez, você precisa baixar a tabela NCM e popular o banco vetorial.
+
+```bash
+# run script
+python -m app.scripts.setup 
+```
+---
+
+
+### 10. Rodar o projeto
+
+No terminal do ambiente virtual ativado:
 
 ```powershell
 uvicorn app.main:app --reload
 ```
 
-* FastAPI disponível em [http://127.0.0.1:8000](http://127.0.0.1:8000)
-* Auto-reload ativado para desenvolvimento.
+* O FastAPI estará disponível em [http://127.0.0.1:8000](http://127.0.0.1:8000)
+* O parâmetro `--reload` ativa o auto-reload para desenvolvimento.
+
+---
+
+### 11. Acessar documentações
+
+Acesse:
+
+```powershell
+http://127.0.0.1:8000/docs
+```
+
+Você verá a **interface Swagger** do FastAPI.
 
 ---
 
 ### Observações importantes
 
-* Sempre ative o **virtualenv do Poetry** antes de rodar comandos.
+* Sempre ative o **virtualenv do Poetry** antes de rodar o `uvicorn`.
+* Todas as bibliotecas do projeto estão isoladas nesse ambiente.
+* Ao clonar o projeto em outro computador, basta rodar `poetry install` e ativar o ambiente.
+* Rode o `script.setup` **uma única vez** antes de iniciar a API.
+
 ---
 
 ### Referências

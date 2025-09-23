@@ -1,5 +1,14 @@
 # VSCode
 .vscode/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+#csv tipi
+ncm_chapter_85.csv
+
+#collection chromadb
+collection/
 
 # Environment
 .env
