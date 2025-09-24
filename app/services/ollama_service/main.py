@@ -7,15 +7,21 @@ async def main():
     pdf_processado1 = EnterPDF("exemplo_pdf_entrada.pdf")
     dados = pdf_processado1.process_enter()
     descs = pdf_processado1.get_erp_desc()
-    
-    # Gera descrições finais (em paralelo)
+    test = ['05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15']
+    for key in test:
+        descs.pop(key,None)
+    print(descs)
+    print("""
+
+
+
+    """)
+
     resultados_paralelo = await Generate_final_desc.generate_final_desc_async(descs)
     
-    # Ou sequencialmente 
-    # resultados_sequencial = await Generate_final_desc.generate_final_desc_sequential(descs)
-    
+   
     print("Resultados:", resultados_paralelo)
 
-# Para executar
+
 if __name__ == "__main__":
     asyncio.run(main())
