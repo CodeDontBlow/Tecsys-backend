@@ -16,8 +16,8 @@ class EnterPDF:
 
         return self.data
     
-    def get_company_name(self):
-        return Find_info.find_company_name(self.text)
+    def get_supplyer_name(self):
+        return Find_info.find_supplyer_name(self.text)
     
     def get_erp_desc(self):
         desc ={mercadoria['numero']: mercadoria['nome'] for mercadoria in self.data.values()}
@@ -28,6 +28,6 @@ class EnterPDF:
         return pn
     
     def get_erp_code(self):
-        code = {mercadoria['numero']: mercadoria['codigo_company'] for mercadoria in self.data.values()}
+        code = {mercadoria['numero']: mercadoria['codigo_erp'] for mercadoria in self.data.values()}
         return code
 

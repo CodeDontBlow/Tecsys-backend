@@ -2,13 +2,13 @@ import re
 
 class Find_info:
 
-    def find_company_name(linha):
+    def find_supplyer_name(linha):
         if "Company:" in linha:
-            company_with_code = linha.split("Company:")[1].strip()
+            supplyer_with_code = linha.split("Company:")[1].strip()
             
-            company = company_with_code.split('(')[0].strip()
+            supplyer = supplyer_with_code.split('(')[0].strip()
 
-            return company
+            return supplyer
         return None
 
     def find_product_info(linha):
@@ -17,7 +17,7 @@ class Find_info:
             
             if len(partes) >= 10:
                 mercadoria = partes[0]  
-                codigo_company = partes[6]  
+                codigo_erp = partes[6]  
                 
             
                 desc_start = linha.find('-')
@@ -55,7 +55,7 @@ class Find_info:
                         'mercadoria': mercadoria,
                         'nome': nome,
                         'part_number': part_number,
-                        'codigo_company': codigo_company
+                        'codigo_erp': codigo_erp
                     }
         
         return None

@@ -4,19 +4,19 @@ from app.services.extract_service.find_info import Find_info
 class Extract_json:
 
     def extract(txt):
-        company = None
+        supplyer = None
         products = []
         
         for linha in txt.splitlines():
-            if company is None:
-                company = Find_info.find_company_name(linha)
+            if supplyer is None:
+                supplyer = Find_info.find_supplyer_name(linha)
             
             product_info = Find_info.find_product_info(linha)
             if product_info:
                 products.append(product_info)
         
         return {
-            'company': company,
+            'supplyer': supplyer,
             'products': products
         }
 
@@ -30,7 +30,7 @@ class Extract_json:
                 "numero": product["mercadoria"],
                 "nome": product["nome"],
                 "part_number": product["part_number"],
-                "codigo_company": product["codigo_company"]
+                "codigo_erp": product["codigo_erp"]
             }
         
         return json.dumps(result, ensure_ascii=False, indent=2)
