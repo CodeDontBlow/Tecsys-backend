@@ -9,6 +9,21 @@ class Generate_final_desc:
     load_dotenv()
 
     @staticmethod
+    def _clean_response(response_text):
+       """Remove tags <think> e qualquer conteúdo entre elas"""
+       # Remove conteúdo entre <think> e </think>
+       cleaned_text = re.sub(r'<think>.*?</think>', '', response_text, flags=re.DOTALL)
+        
+        # Remove qualquer tag <think> solta (caso não tenha fechamento)
+       cleaned_text = re.sub(r'<think>.*', '', cleaned_text, flags=re.DOTALL)
+        
+        # Remove espaços em excesso e quebras de linha extras
+       cleaned_text = re.sub(r'\n\s*\n', '\n\n', cleaned_text.strip())
+        
+       return cleaned_text.strip()
+
+
+    @staticmethod
     async def generate_final_desc_async(descs):
         print(f" INICIANDO PROCESSO ASSÍNCRONO")
         print(f" Total de descrições para processar: {len(descs)}")
@@ -39,8 +54,16 @@ class Generate_final_desc:
         resultados = {}
         print("\n PROCESSANDO RESULTADOS:")
         for (codigo, descricao), response in zip(descs.items(), responses):
-            resultados[codigo] = response['response']
-            print(f"  ✓ Código {codigo} - Resposta: {len(response['response'])} caracteres")
+            # Limpa a resposta removendo tags <think>
+            resposta_limpa = Generate_final_desc._clean_response(response['response'])
+            resultados[codigo] = resposta_limpa
+            
+            print(f"  ✓ Código {codigo}")
+            print(f"    Resposta original: {len(response['response'])} caracteres")
+            print(f"    Resposta limpa: {len(resposta_limpa)} caracteres")
+            if len(resposta_limpa) < len(response['response']):
+                print(f"    ⚠️  Conteúdo removido: {len(response['response']) - len(resposta_limpa)} caracteres")
+        
         
         print(f"\n PROCESSO FINALIZADO COM SUCESSO!")
         print(f" Total de resultados gerados: {len(resultados)}")
