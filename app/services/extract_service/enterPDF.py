@@ -1,3 +1,4 @@
+import json
 from app.services.extract_service.pdf2txt import pdf_to_text 
 from app.services.extract_service.extract_json import Extract_json
 from app.services.extract_service.find_info import Find_info
@@ -11,13 +12,22 @@ class EnterPDF:
     def process_enter(self):
         """Método principal de entrada"""
         self.text = pdf_to_text(self.path_pdf)
-        self.data = Extract_json.return_Datajson(self.text)
+        self.data = json.loads(Extract_json.return_Datajson(self.text))
+
         return self.data
     
     def get_company_name(self):
         return Find_info.find_company_name(self.text)
+    
+    def get_erp_desc(self):
+        desc ={mercadoria['numero']: mercadoria['nome'] for mercadoria in self.data.values()}
+        return desc
+    
+    def get_pn(self):
+        pn = {mercadoria['numero']: mercadoria['part_number'] for mercadoria in self.data.values()}
+        return pn
+    
+    def get_erp_code(self):
+        code = {mercadoria['numero']: mercadoria['codigo_company'] for mercadoria in self.data.values()}
+        return code
 
-# Uso:
-# pdf_processado1 = enterPDF("exemplo_pdf_entrada.pdf")
-# dados = pdf_processado1.process_enter()
-# nome = pdf_processado1.get_company_name()
