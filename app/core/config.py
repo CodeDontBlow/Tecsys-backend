@@ -5,6 +5,7 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "tecsys-backend"
     ROOT_PATH: str = '/'
     DATABASE_URL: str
+    LLM_DESC: str
 
     class Config:
         env_file = ".env"

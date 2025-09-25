@@ -11,7 +11,7 @@ def get_ncm(query: str) -> Response:
         return None 
     
     return {
-        "query original": query,
+        "query": query,
         "ncm_code": response.result.ncm_code,
         "description": response.result.description
     }

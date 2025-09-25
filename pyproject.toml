@@ -23,7 +23,8 @@ dependencies = [
     "requests (>=2.32.5,<3.0.0)",
     "ollama (>=0.5.3,<0.6.0)",
     "chromadb (>=1.0.21,<2.0.0)",
-    "pypdf2 (>=3.0.1,<4.0.0)"
+    "pypdf2 (>=3.0.1,<4.0.0)",
+    "python-multipart (>=0.0.20,<0.0.21)"
 ]
 
 [[tool.poetry.packages]]
