@@ -3,8 +3,6 @@
 __pycache__/
 *.pyc
 .pytest_cache/
-modelfile/
-modelfile
 #csv tipi
 ncm_chapter_85.csv
 
