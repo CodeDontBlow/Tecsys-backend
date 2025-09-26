@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import List
 
 @dataclass
 class NCMResult:
@@ -9,5 +10,5 @@ class NCMResult:
 @dataclass
 class Response:
     query:str
-    result: NCMResult
+    results: List[NCMResult]
     

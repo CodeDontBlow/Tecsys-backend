@@ -1,7 +1,7 @@
 from app.db.chroma_db.config import CHROMA_DB_PATH, COLLECTION_NAME, CSV_PATH
-from app.db.chroma_db.embedding import get_embedding_ollama
-from app.db.chroma_db.model import NCMResult, Response
+from app.db.chroma_db.embedding import get_embedding_ollama, generate_optimized_query
 from app.util.text_processing import formated_query
+from app.db.chroma_db.model import NCMResult, Response
 import chromadb
 import pandas as pd
 import uuid
@@ -63,24 +63,32 @@ class ChromaDBManager:
 
     def search_ncm(self, query: str) -> Response:
         try:
-            query_for_embedding = formated_query(query) 
-            
+            query_optimized = formated_query(query)
             results = self.collection.query(
-                query_texts=[query_for_embedding], 
-                n_results=1,
+                query_texts=[query_optimized],
+                n_results=10,
             )
 
-            first_result = NCMResult(
-                ncm_code=results['metadatas'][0][0]['codigo_ncm'],
-                description=results['documents'][0][0],
-                distance=results['distances'][0][0]
-            )
+            ncm_results = []
+            for i in range(len(results['metadatas'][0])):
+                codigo_ncm = results['metadatas'][0][i]['codigo_ncm']
+                description = results['documents'][0][i]
+                distance = results['distances'][0][i]
 
-            return Response(query=query, result=first_result)
+                # Se for subposição (8532.24), mantém mas distancia 0
+                if len(codigo_ncm) == 7:
+                    distance = 0.0
+
+                ncm_results.append(NCMResult(
+                    ncm_code=codigo_ncm,
+                    description=description,
+                    distance=distance
+                ))
+
+            return Response(query=query, results=ncm_results)
 
         except Exception as e:
             logger.error(f"Error to search: {e}")
-            return Response(query=query, result=None)
-    
+            return Response(query=query, results=[])
 chroma_manager = ChromaDBManager()
         
