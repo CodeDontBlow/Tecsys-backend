@@ -44,3 +44,4 @@ def formated_query(query: str) -> str:
 
 
 
+

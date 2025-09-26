@@ -13,5 +13,6 @@ def get_ncm(query: str) -> Response:
     return {
         "query original": query,
         "ncm_code": response.result.ncm_code,
-        "description": response.result.description
+        "description": response.result.description,
+        "distance": response.result.distance
     }

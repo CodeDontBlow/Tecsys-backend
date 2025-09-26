@@ -1,29 +1,22 @@
-from app.db.chroma_db.manager import chroma_manager
 from app.services.ncm_service import get_ncm
+import json
 
-# fake_descriptions = [
-#     "Capacitor eletrolítico de alumínio, 10 uF, 100 V, ±20%, 2000 horas a 85°C, Radial Can - SMD", 
-#     "Capacitor cerâmico 1 uF, 16 V, X7R, 5%, encapsulamento 0805, até 125°C, montagem SMD (tape & reel)",  
-#     "Diodo retificador em ponte, 1 kV, 2 A, 4 pinos, encapsulamento KBP, formato caixa",  
-#     "Conector HDMI, 19 pinos, passo de 0,5 mm, solda RA, SMD, porta única em bandeja", 
-#     "Conector para placas empilháveis, série DW, 1 contato, conector tipo header, through-hole, 1 fila", 
-#     "Capacitor cerâmico multicamadas, 10 pF, 25 V, ±0,5 pF, tipo C0G (NP0), encapsulamento 0201 [0603 métrico]", 
-#     "Sensor de luz ambiente, infravermelho, analógico, solda, tensão de operação 2,5 a 5,5 V",
-#     "Transdutor de áudio eletromagnético, 1,5 Vp-p, 10 mA, pino 1 Vp-p, 1548 Hz a 2548 Hz, through-hole", 
-#     "Retificador padrão, 400 V, 1,0 A",  
-#     "Driver de gate, 1 canal, isolado, high side, IGBT, MOSFET Si e SiC, 8 pinos, DSO" 
-# ]
+descriptions_excel = [
+    "CAPACITOR ELETROLÍTICO DE ALUMÍNIO, 10 UF, 100 V, ±20%, 2000 HORAS A 85°C, RADIAL CAN - SMD",
+    "CAPACITOR CERÂMICO 1 UF, 16 V, X7R, 5%, ENCAPSULAMENTO 0805, ATÉ 125°C, MONTAGEM SMD (TAPE & REEL)",
+    "CONDENSADORES ELÉTRICOS( CAPACITORES) DE CAMADAS MÚLTIPLAS, FIXOS, DIELÉTRICO DE CERÂMICA, SMD (PARA MONTAGEM EM SUPERFÍCIE), 15 PF ± 5% 50V, C0G, CAPACITOR DE CERÂMICA C0G, NP0 0603 (1608 MÉTRICO), PRÓPRIAS PARA MONTAGEM EM SUPERFÍCIE (SMD - SURFACE MOUNTED DEVICE).",
+    "LEDS PADRÃO - SMD VERDE DIFUSADO ÂNGULO DIREITO, LED COR: VERDE, LED MONTAGEM: SMD, TAMANHO DA LÂMPADA: 2MM, CORRENTE DIRETA SE: 20MA, TENSÃO DIRETA: 2.1V, TIPO DE COMPRIMENTO DE ONDA: 560NM, INTENSIDADE LUMINOSA: 5.2MCD, VISUALIZANDO ÂNGULO: 130°, FORMATO DA LENTE: CÚPULA,. PRÓPRIOS PARA MONTAGEM EM SUPERFÍCIE (SMD - SURFACE MOUNTED DEVICE)",
+    "DIODO DIFUSO, LED, AMARELO, BRILHANTE, DIALIGHT,VISTA LATERAL, 1208 YELLOW 20MA 2.8V, PRÓPRIOS PARA MONTAGEM EM SUPERFÍCIE (SMD - SURFACE MOUNTED DEVICE)",
+    "ONECTOR PARA CIRCUITO IMPRESSO - CONECTOR USB, TIPO A, RCPT, 4POS, TH, TIPO DE CONECTOR USB: USB TIPO A, PADRÃO USB: USB 2.0, GÊNERO: RECEPTÁCULO, Nº DE POSIÇÕES: 4 POSIÇÕES, MONTAGEM DO CONECTOR: ATRAVÉS DE MONTAGEM EM ORIFÍCIO, ORIENTAÇÃO: ÂNGULO RETO, CONTATO MATERIAL: LIGA DE COBRE, PARA MONTAGEM EM PLACA DE CIRCUITO IMPRESSO.",
+    "CONECTOR PARA CIRCUITO IMPRESSO – SENDO BLOCOS DE TERMINAIS PLUGÁVEIS WR-TBL TERMINAL BLOCK - PCB HEADER – THT, ESPAÇAMENTO DE PASSO: 5,08 MM, NÚMERO DE POSIÇÕES: 2 POSIÇÕES, CORRENTE NOMINAL: 20A, TENSÃO NOMINAL: 300 V, ORIENTAÇÃO DO BLOCO: ÂNGULO RETO DO ORIFÍCIO DE PASSAGEM, GAMA DE PRODUTOS: WR-TBL 313 SERIES ROHS COMPLIANT: SIM, THROUGH HOLE.",
+    "BLOCOS DE TERMINAIS PLUGÁVEIS WR-TBL TERMINAL BLOCK, 300VAC, 20A, 2 POSIÇÕES, 12 AWG TO 24 AWG, AFASTAMENTO: 5,08MM, 300 VAC. P/N: 691351500002. (COD. 070060766)",
+    "INDUTORES DE POTÊNCIA – SMD - 4.8 MM X 4.8 MM - 1 UH, 30 %, 23 MOHMS, 4.47 A, - 40 C + 125 C, 237 MHZ. PRÓPRIAS PARA MONTAGEM EM SUPERFÍCIE (SMD - SURFACE MOUNTED DEVICE). P/N: 74406042010. (COD. 070130366)",
+    "PLACA DE MICRO PROCESSAMENTO, MONTADA COM COMPONENTE ELETRONICO E DISPOSITIVO DE DISSIPAÇÃO DE CALOR, PROCESSADOR AT 454MHZ, 64 MB RAM, ETHERNET 100 MBIT, CONVERSOR USB/ ETHERNET. P/N: IMX233-OLINUXINO-MAXI. (COD. 070270074)",
+    "ANTENA MAGNETICA – 694-894 E 1700-2700 GHZ, SMA, 3 DBI, 2:1, - 40º + 85º C, 50 OHMS, COM CONECTOR TIPO SMA MACHO. P/N: MGRM-WLF-3C-BLK-120. (COD.070270340)"
 
-# for d in fake_descriptions:
-#     response = chroma_manager.search_ncm(d)
-
-#     print()
-#     print("Description search: ", d)
-#     print("NCM:", response.result.ncm_code)
-#     print("Description ncm: ", response.result.description)
-#     print("Distance: ",response.result.distance)
-
-    
-
+]
 # TEST SERVICE
-print(get_ncm("Capacitor eletrolítico de alumínio, 10 uF, 100 V, ±20%, 2000 horas a 85°C, Radial Can - SMD"))
+for description in descriptions_excel:
+    result = get_ncm(description)
+    # Imprime o JSON "bonito" no terminal
+    print(json.dumps(result, indent=4, ensure_ascii=False))
