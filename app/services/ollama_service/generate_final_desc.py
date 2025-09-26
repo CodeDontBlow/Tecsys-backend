@@ -1,5 +1,4 @@
-import asyncio, time, re
-import requests
+import asyncio, time
 from .llm_settings import Llm_settings
 from .clean_response import Clean_response
 from ollama import AsyncClient
@@ -26,7 +25,7 @@ class Generate_final_desc:
 
             tasks.append(task)
         
-        print(f"\n send {len(tasks)} req async...")
+
         start_time = time.time()
         
 
@@ -39,13 +38,13 @@ class Generate_final_desc:
         
 
         resultados = {}
-        print("\n process results:")
+
         for (codigo, descricao), response in zip(erp_desc.items(), responses):
             resposta_limpa = Clean_response.clean_response(response['response'])
             resultados[codigo] = resposta_limpa
         
         
-        print(f"\n process finished")
+
         
         return resultados
 

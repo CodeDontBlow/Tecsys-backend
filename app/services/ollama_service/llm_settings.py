@@ -1,10 +1,7 @@
-# setup_ollama.py
 import os
 import ollama
 import subprocess
 
-#line 39 in generate final_desc
-# 
 class Llm_settings:
 
     def check_model_exists(model_name):
