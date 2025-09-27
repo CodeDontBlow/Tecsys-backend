@@ -6,6 +6,7 @@ class NCMResult:
     ncm_code: str
     description:str
     distance:float
+    is_parent:bool = False
 
 @dataclass
 class Response:

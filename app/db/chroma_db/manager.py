@@ -89,14 +89,15 @@ class ChromaDBManager:
     def search_ncm(self, query: str) -> Response:
         try:
             query_optimized = formated_query(query)
-
-            # Passo 1: busca pelo embedding
             results = self.collection.query(
                 query_texts=[query_optimized],
-                n_results=3
+                n_results=10  # pega mais candidatos para poder ter 2 pais
             )
 
             ncm_results = []
+            parent_count = 0
+            max_parents = 2
+            max_children = 1
 
             for meta, doc, dist in zip(
                 results['metadatas'][0],
@@ -104,37 +105,41 @@ class ChromaDBManager:
                 results['distances'][0]
             ):
                 codigo = meta['codigo_ncm']
+                pai = codigo[:6]
 
-                if len(codigo) == 6:
+                if parent_count < max_parents:
+                    # Adiciona o pai
+                    ncm_results.append(NCMResult(
+                        ncm_code=chroma_manager.format_ncm(pai),
+                        description=doc,
+                        distance=dist,
+                        is_parent=True
+                    ))
+                    parent_count += 1
+
+                    # Busca até max_children filhos
                     filhos = self.collection.query(
                         query_texts=[query_optimized],
-                        where={"codigo_pai": {"$eq": codigo}},
-                        n_results=1  
+                        where={"codigo_pai": {"$eq": pai}},
+                        n_results=max_children
                     )
 
-                    if filhos['documents'][0]:
-                        f_meta = filhos['metadatas'][0][0]
-                        f_doc = filhos['documents'][0][0]
-                        f_dist = filhos['distances'][0][0]
-
+                    for f_meta, f_doc, f_dist in zip(
+                        filhos['metadatas'][0],
+                        filhos['documents'][0],
+                        filhos['distances'][0]
+                    ):
                         ncm_results.append(NCMResult(
                             ncm_code=chroma_manager.format_ncm(f_meta['codigo_ncm']),
                             description=f_doc,
-                            distance=f_dist
+                            distance=f_dist,
+                            is_parent=False
                         ))
-                else:
-                    ncm_results.append(NCMResult(
-                        ncm_code=chroma_manager.format_ncm(codigo),
-                        description=doc,
-                        distance=dist
-                    ))
 
             return Response(query=query, results=ncm_results)
 
         except Exception as e:
             logger.error(f"Erro na busca: {e}")
             return Response(query=query, results=[])
-
-
 chroma_manager = ChromaDBManager()
         

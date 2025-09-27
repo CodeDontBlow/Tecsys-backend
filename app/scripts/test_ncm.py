@@ -17,4 +17,4 @@ descriptions_pt = [
 # TEST SERVICE
 for description in descriptions_pt:
     result = get_ncm(description)
-    print(json.dumps(result, indent=4, ensure_ascii=False))
+    print(json.dumps(result, indent=3, ensure_ascii=False))
