@@ -31,34 +31,38 @@ async def ping_db(db: DatabaseDependency):
 
 
 @api_router.post("/upload_pdf")
-async def run_flow(pdf: UploadFile = File(...)
-                   , description: str = Form(...)
-                   ):
-    
-    embeeding_object = get_ncm(description)
+async def run_flow(pdf: UploadFile = File(...)):
+    data = {}
 
-    # START PDF AND LLM FLOW
+    # pdf extraction process
     pdf_bytes = await pdf.read()
+    pdf_file = EnterPDF(pdf_bytes=pdf_bytes)
+    pdf_data = pdf_file.process_enter()
+    
+    # filter pdf_data
+    test = ['mercadoria_01']
+    filtered_pdf_data = {k: pdf_data[k] for k in test if k in pdf_data}
 
-    pdf_object = EnterPDF(pdf_bytes=pdf_bytes)
+    # get products descriptions in filtered data
+    products_descriptions = {k: filtered_pdf_data[k]['nome'] for k in filtered_pdf_data}
 
-    pdf_object.process_enter()
+    # run llm decriptions generate
+    final_product_description = await Generate_final_desc.generate_final_desc_async(products_descriptions)
 
-    products_descs = pdf_object.get_erp_desc()
+    # get ncm by a descript
+    embeeding_object= get_ncm("Capacitor eletrolítico de alumínio, 10 uF, 100 V, ±20%, 2000 horas a 85°C, Radial Can - SMD")
 
-    test = ['01']
-    products_descs = {k: products_descs[k] for k in test if k in products_descs}
-    print(products_descs)
+    # build json response
+    for key, product_data in filtered_pdf_data.items():
+        data[key] = {    
+            'id': product_data['numero'], 
+            'erp_code': product_data['codigo_erp'],
+            'part_number': product_data['part_number'],
+            'final_description': final_product_description[key],
+            'product_embeeding': embeeding_object
+            }
 
-    llm_results = await Generate_final_desc.generate_final_desc_async(products_descs)
-    # FINISH PDF AND LLM FLOW
+    print(final_product_description)
+    print(embeeding_object)
 
-    return JSONResponse({
-        "ai-description": llm_results,
-        "embeeding": embeeding_object
-        # {
-        #     "original_query": embeeding_object.query,
-        #     "ncm_code": embeeding_object.ncm_code,
-        #     "product-description": embeeding_object.description,
-        # },
-    })
+    return JSONResponse(content={"data": data})

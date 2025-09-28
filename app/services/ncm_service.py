@@ -9,9 +9,10 @@ def get_ncm(query: str) -> Response:
 
     if response.result is None:
         return None 
-    
+        
     return {
         "query": query,
         "ncm_code": response.result.ncm_code,
-        "description": response.result.description
+        "description": response.result.description,
+        "distance": float(f"{response.result.distance:.2f}")
     }

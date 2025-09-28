@@ -26,7 +26,7 @@ class Generate_final_desc:
 
     @staticmethod
     async def generate_final_desc_async(descs):
-        print(f"Total descriptions to process:{len(descs)}")
+        # print(f"Total descriptions to process:{len(descs)}")
         
         llm_description = os.getenv("LLM_DESC")
         print(f" llm configred: {'yes' if llm_description else 'no'}")
@@ -35,9 +35,9 @@ class Generate_final_desc:
         
 
         tasks = []
-        print("\n cooking tasks:")
+        # print("\n cooking tasks:")
         for i, (codigo, descricao) in enumerate(descs.items(), 1):
-            print(f"  {i}. Código: {codigo} - Descrição: {descricao[:50]}...")
+            # print(f"  {i}. Código: {codigo} - Descrição: {descricao[:50]}...")
             task = client.generate(llm_description, descricao)
             tasks.append(task)
         
@@ -47,26 +47,26 @@ class Generate_final_desc:
         responses = await asyncio.gather(*tasks)
         
         end_time = time.time()
-        print(f" req async complete")
+        # print(f" req async complete")
         print(f" total time: {end_time - start_time:.2f} secs")
         
 
         resultados = {}
-        print("\n process results:")
+        # print("\n process results:")
         for (codigo, descricao), response in zip(descs.items(), responses):
             # remove os thinks
             resposta_limpa = Generate_final_desc._clean_response(response['response'])
             resultados[codigo] = resposta_limpa
             
-            print(f"  ✓ Código {codigo}")
-            print(f"    original response: {len(response['response'])} caracteres")
-            print(f"    cleaned response: {len(resposta_limpa)} caracteres")
-            if len(resposta_limpa) < len(response['response']):
-                print(f"      removed: {len(response['response']) - len(resposta_limpa)} caracteres")
+        #     print(f"  ✓ Código {codigo}")
+        #     print(f"    original response: {len(response['response'])} caracteres")
+        #     print(f"    cleaned response: {len(resposta_limpa)} caracteres")
+        #     if len(resposta_limpa) < len(response['response']):
+        #         print(f"      removed: {len(response['response']) - len(resposta_limpa)} caracteres")
         
         
-        print(f"\n process finished")
-        print(f" total of descs: {len(resultados)}")
+        # print(f"\n process finished")
+        # print(f" total of descs: {len(resultados)}")
         
         return resultados
 
