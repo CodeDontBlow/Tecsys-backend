@@ -3,10 +3,9 @@
 __pycache__/
 *.pyc
 .pytest_cache/
-modelfile/
-modelfile
 #csv tipi
 ncm_chapter_85.csv
+
 
 #collection chromadb
 collection/
@@ -185,8 +184,11 @@ env-embedding
 
 # Rope project settings
 .ropeproject
-tests\exemplo_pdf_entrada.pdf
+
+#pdfs
+INVOICE TECSYS.pdf
 exemplo_pdf_entrada.pdf
+
 # mkdocs documentation
 /site
 
