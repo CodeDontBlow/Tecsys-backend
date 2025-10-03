@@ -32,19 +32,10 @@ RUN echo '#!/bin/bash' > /docker-entrypoint.sh && \
     echo '' >> /docker-entrypoint.sh && \
     echo 'exec "$@"' >> /docker-entrypoint.sh
 
-RUN chmod +x /docker-entrypoint.sh
-
 COPY . .
 
 RUN mkdir -p /app/data /app/db/chroma_db
 
-RUN useradd -m -u 1000 appuser && \
-    chown -R appuser:appuser /app
-
-USER appuser
-
 EXPOSE 8000
-
-ENTRYPOINT ["/docker-entrypoint.sh"]
 
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
