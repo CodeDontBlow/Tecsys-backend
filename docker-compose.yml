@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  backend:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://user:password@db:5432/app_db
+      - OLLAMA_URL_EMBEDDING=http://ollama:11434/api/embeddings
+      - OLLAMA_URL_GENERATE=http://ollama:11434/api/generate
+      - EMBEDDING_MODEL=bge-m3
+      - GENERATE_MODEL=llama3:8b
+      - CSV_PATH=/app/data/ncm_chapter_85.csv
+      - CHROMA_DB_PATH=/app/db/chroma_db/collection
+      - COLLECTION_NAME=ncm_85_collection
+    volumes:
+      - .:/app
+      - ./data:/app/data
+      - chroma_data:/app/db/chroma_db  # Mapear volume do ChromaDB
+    depends_on:
+      ollama:
+        condition: service_started
+      chromadb:
+        condition: service_started
+    restart: unless-stopped
+
+
+  db:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=app_db
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
+
+
+  chromadb:
+    image: chromadb/chroma:latest
+    ports:
+      - "8001:8000"
+    environment:
+      - IS_PERSISTENT=TRUE
+      - PERSIST_DIRECTORY=/chroma_data
+      - ALLOW_RESET=TRUE
+    volumes:
+      - chroma_data:/chroma_data
+    restart: unless-stopped
+
+
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+
+
+volumes:
+  postgres_data:
+  chroma_data:
+  ollama_data:
