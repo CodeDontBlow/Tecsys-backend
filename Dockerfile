@@ -17,13 +17,7 @@ RUN apt-get update && apt-get install -y \
 
 RUN curl -sSL https://install.python-poetry.org | python3 -
 
-
-RUN curl -L -o ollama.tar.gz https://github.com/jmorganca/ollama/releases/download/v0.1.32/ollama-linux-amd64.tar.gz && \
-    tar -xzf ollama.tar.gz && \
-    mv ollama /usr/local/bin/ && \
-    chmod +x /usr/local/bin/ollama && \
-    rm ollama.tar.gz
-
+RUN curl -fsSL https://ollama.com/install.sh | sh
 
 RUN which ollama && ollama --version
 
