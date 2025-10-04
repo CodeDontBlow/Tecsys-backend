@@ -9,9 +9,8 @@ services:
       - DATABASE_URL=postgresql://user:password@db:5432/app_db
       - OLLAMA_URL_EMBEDDING=http://ollama:11434/api/embeddings
       - OLLAMA_URL_GENERATE=http://ollama:11434/api/generate
-      - EMBEDDING_MODEL=bge-m3
-      - GENERATE_MODEL=llama3:8b
-      - CSV_PATH=/app/data/ncm_chapter_85.csv
+      - EMBEDDING_MODEL=qwen3-embedding:0.6b
+      - CSV_PATH = app/util/tipi/tipi_chapter_85.csv
       - CHROMA_DB_PATH=/app/db/chroma_db/collection
       - COLLECTION_NAME=ncm_85_collection
     volumes:
