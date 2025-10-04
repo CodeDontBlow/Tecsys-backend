@@ -1,7 +1,7 @@
 FROM python:3.11-slim
 
 ENV PYTHONUNBUFFERED=1 \
-    POETRY_VERSION=1.8.0 \
+    POETRY_VERSION=1.8.2 \
     POETRY_HOME="/opt/poetry" \
     POETRY_VIRTUALENVS_CREATE=false \
     PATH="/opt/poetry/bin:$PATH"
@@ -16,6 +16,8 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean
 
 RUN curl -sSL https://install.python-poetry.org | python3 -
+
+RUN curl -fsSL https://ollama.com/install.sh | sh
 
 COPY pyproject.toml ./
 

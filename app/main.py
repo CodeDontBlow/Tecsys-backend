@@ -1,6 +1,5 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from app.services.ncm_service import get_ncm
 from app.db.chroma_db.manager import ChromaDBManager
 import logging
 

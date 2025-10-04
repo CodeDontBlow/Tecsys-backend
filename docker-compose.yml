@@ -7,23 +7,20 @@ services:
       - "8000:8000"
     environment:
       - DATABASE_URL=postgresql://user:password@db:5432/app_db
-      - OLLAMA_URL_EMBEDDING=http://ollama:11434/api/embeddings
-      - OLLAMA_URL_GENERATE=http://ollama:11434/api/generate
+      - OLLAMA_URL_EMBEDDING=http://localhost:11434/api/embeddings
+      - OLLAMA_URL_GENERATE=http://localhost:11434/api/generate
       - EMBEDDING_MODEL=qwen3-embedding:0.6b
-      - CSV_PATH = app/util/tipi/tipi_chapter_85.csv
+      - CSV_PATH=app/util/tipi/tipi_chapter_85.csv
       - CHROMA_DB_PATH=/app/db/chroma_db/collection
       - COLLECTION_NAME=ncm_85_collection
     volumes:
       - .:/app
       - ./data:/app/data
-      - chroma_data:/app/db/chroma_db  
+      - chroma_data:/app/db/chroma_db/collection  # Volume para persistir ChromaDB
+      - ollama_data:/root/.ollama     # Volume para persistir modelos Ollama
     depends_on:
-      ollama:
-        condition: service_started
-      chromadb:
-        condition: service_started
+      - db
     restart: unless-stopped
-
 
   db:
     image: postgres:15
@@ -37,29 +34,6 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     restart: unless-stopped
-
-
-  chromadb:
-    image: chromadb/chroma:latest
-    ports:
-      - "8001:8000"
-    environment:
-      - IS_PERSISTENT=TRUE
-      - PERSIST_DIRECTORY=/chroma_data
-      - ALLOW_RESET=TRUE
-    volumes:
-      - chroma_data:/chroma_data
-    restart: unless-stopped
-
-
-  ollama:
-    image: ollama/ollama:latest
-    ports:
-      - "11434:11434"
-    volumes:
-      - ollama_data:/root/.ollama
-    restart: unless-stopped
-
 
 volumes:
   postgres_data:
