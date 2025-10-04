@@ -34,6 +34,8 @@ def config_system_tools():
     try:
         logger.info("START CONFIG DOWNLOAD")
         logger.info("Ollama verify")
+        check_ollama()
+        pull_ollama_model_embedding()
         logger.info("Table TIPI verify")
         fetch_tipi_data()
         logger.info("Chromadb verify")
