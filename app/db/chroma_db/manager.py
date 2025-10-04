@@ -1,6 +1,6 @@
 from app.db.chroma_db.config import CHROMA_DB_PATH, COLLECTION_NAME, CSV_PATH
 from app.db.chroma_db.embedding import get_embedding_ollama
-from app.util.text_processing import formated_query
+from app.util.tipi.table_tipi import formated_query
 from app.db.chroma_db.model import NCMResult, Response
 import chromadb
 import pandas as pd
@@ -32,114 +32,166 @@ class ChromaDBManager:
         return code.replace(".", "").strip()
 
     def classify_ncm(self, code: str):
-        if len(code) == 2:
-            return "capitulo", ""
-        elif len(code) == 4:
-            return "posicao", code[:2]
-        elif len(code) == 6:
-            return "subposicao", code[:4]
+        if len(code) == 6:
+            return "parent", ""
         elif len(code) == 8:
-            return "item", code[:6]
-        return "desconhecido", ""
+            return "child", code[:6]  
+        return "unknown", ""
     
     def format_ncm(self, code: str) -> str:
         code = code.strip()
-        if len(code) == 2:
-            return code
-        elif len(code) == 4:
-            return f"{code[:2]}{code[2:]}"
-        elif len(code) == 6:
+        if len(code) == 6:  
             return f"{code[:2]}{code[2:4]}.{code[4:]}"
         elif len(code) == 8:
             return f"{code[:2]}{code[2:4]}.{code[4:6]}.{code[6:]}"
         return code
 
-    def populate_from_csv(self):
+    def populate_from_csv(self, batch_size: int = 50):
+        """
+        Popula o ChromaDB a partir do CSV, processando em batches menores
+        e adicionando apenas NCM com 6 dígitos ou mais.
+        """
         if self.collection.count() > 0:
-            logger.info(f"Collection já tem {self.collection.count()} itens.")
+            logger.info(f"Collection already has {self.collection.count()} items.")
             return
 
         df = pd.read_csv(CSV_PATH)
-        ids, documents, metadatas = [], [], []
+        total_items = len(df)
+        logger.info(f"Preparing to add {total_items} items in batches of {batch_size}.")
 
-        for _, row in df.iterrows():
-            raw_code = str(row["Codigo"]).strip()
-            description = str(row["Descricao"]).strip()
+
+        ids_batch, documents_batch, metadatas_batch = [], [], []
+
+        for idx, row in df.iterrows():
+            raw_code = str(row["ncm"]).strip()
+            description = str(row["descrição"]).strip()
+            aliquot = str(row.get("alíquota (%)", ""))
 
             code_digits = self.normalize_code(raw_code)
-            nivel, codigo_pai = self.classify_ncm(code_digits)
 
-            ids.append(str(uuid.uuid4()))
-            documents.append(description)
-            metadatas.append({
-                "codigo_ncm": code_digits,
-                "codigo_ncm_original": raw_code,
-                "descricao_original": description,
-                "nivel": nivel,
-                "codigo_pai": codigo_pai
+            if len(code_digits) < 6:
+                continue
+            level, code_father = self.classify_ncm(code_digits)
+
+            ids_batch.append(str(uuid.uuid4()))
+            documents_batch.append(description)
+            metadatas_batch.append({
+                "code_ncm": code_digits,
+                "description": description,
+                "level": level,
+                "aliquot": aliquot,
+                "code_father": code_father
             })
 
-        self.collection.add(
-            documents=documents,
-            metadatas=metadatas,
-            ids=ids
-        )
-        logger.info(f"Collection populada com {len(df)} itens!")
+            if len(ids_batch) >= batch_size:
+                self._add_batch(ids_batch, documents_batch, metadatas_batch)
+                ids_batch, documents_batch, metadatas_batch = [], [], []
+
+        if ids_batch:
+            self._add_batch(ids_batch, documents_batch, metadatas_batch)
+
+        logger.info(f"Finished populating {total_items} items into the collection.")
+
+    def _add_batch(self, ids, documents, metadatas):
+        try:
+            self.collection.add(
+                ids=ids,
+                documents=documents,
+                metadatas=metadatas
+            )
+            logger.info(f"Added batch of {len(ids)} items.")
+        except Exception as e:
+            logger.error(f"Error adding batch: {e}")
 
     def search_ncm(self, query: str) -> Response:
         try:
             query_optimized = formated_query(query)
+            print(query_optimized)
+
             results = self.collection.query(
                 query_texts=[query_optimized],
-                n_results=10  # pega mais candidatos para poder ter 2 pais
+                n_results=50,
+                include=['metadatas', 'documents', 'distances']
             )
 
             ncm_results = []
+            seen_parents = set()
             parent_count = 0
-            max_parents = 2
-            max_children = 1
+            max_parents = 4
+            max_children = 7
 
-            for meta, doc, dist in zip(
-                results['metadatas'][0],
-                results['documents'][0],
-                results['distances'][0]
-            ):
-                codigo = meta['codigo_ncm']
-                pai = codigo[:6]
+            metas = results['metadatas'][0]
+            docs = results['documents'][0]
+            dists = results['distances'][0]
 
-                if parent_count < max_parents:
-                    # Adiciona o pai
+            for meta, doc, dist in zip(metas, docs, dists):
+                code = meta.get('code_ncm')
+                if not code:
+                    continue
+
+                parent_code = meta.get('code_father') or (code[:6] if len(code) >= 6 else code)
+
+
+                if parent_code in seen_parents:
+                    continue
+                if parent_count >= max_parents:
+                    break
+
+                parent_query = self.collection.query(
+                    query_texts=[query_optimized],           
+                    where={"code_ncm": {"$eq": parent_code}},
+                    n_results=1,
+                    include=['metadatas', 'documents', 'distances']
+                )
+
+                if parent_query['metadatas'][0]:
+                    p_meta = parent_query['metadatas'][0][0]
+                    p_doc = parent_query['documents'][0][0]
+                    p_dist = parent_query['distances'][0][0]
+                    p_aliquot = p_meta.get('aliquot')
                     ncm_results.append(NCMResult(
-                        ncm_code=chroma_manager.format_ncm(pai),
-                        description=doc,
-                        distance=dist,
+                        ncm_code=self.format_ncm(p_meta['code_ncm']),
+                        description=p_doc,
+                        distance=p_dist,
+                        aliquot=p_aliquot,
                         is_parent=True
                     ))
-                    parent_count += 1
+                else:
+                    ncm_results.append(NCMResult(
+                        ncm_code=self.format_ncm(parent_code),
+                        description=doc,
+                        distance=dist,
+                        aliquot=meta.get('aliquot'),
+                        is_parent=True
+                    ))
 
-                    # Busca até max_children filhos
-                    filhos = self.collection.query(
-                        query_texts=[query_optimized],
-                        where={"codigo_pai": {"$eq": pai}},
-                        n_results=max_children
-                    )
+                parent_count += 1
+                seen_parents.add(parent_code)
 
-                    for f_meta, f_doc, f_dist in zip(
-                        filhos['metadatas'][0],
-                        filhos['documents'][0],
-                        filhos['distances'][0]
-                    ):
-                        ncm_results.append(NCMResult(
-                            ncm_code=chroma_manager.format_ncm(f_meta['codigo_ncm']),
-                            description=f_doc,
-                            distance=f_dist,
-                            is_parent=False
-                        ))
+                filhos = self.collection.query(
+                    query_texts=[query_optimized],
+                    where={"code_father": {"$eq": parent_code}},
+                    n_results=max_children,
+                    include=['metadatas', 'documents', 'distances']
+                )
+
+                for f_meta, f_doc, f_dist in zip(
+                    filhos['metadatas'][0],
+                    filhos['documents'][0],
+                    filhos['distances'][0]
+                ):
+                    ncm_results.append(NCMResult(
+                        ncm_code=self.format_ncm(f_meta['code_ncm']),
+                        description=f_doc,
+                        distance=f_dist,
+                        aliquot=f_meta.get('aliquot'),
+                        is_parent=False
+                    ))
 
             return Response(query=query, results=ncm_results)
 
         except Exception as e:
-            logger.error(f"Erro na busca: {e}")
+            logger.error(f"Error: {e}")
             return Response(query=query, results=[])
-chroma_manager = ChromaDBManager()
         
+chroma_manager = ChromaDBManager()
