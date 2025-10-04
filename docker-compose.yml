@@ -7,8 +7,6 @@ services:
       - "8000:8000"
     environment:
       - DATABASE_URL=postgresql://user:password@db:5432/app_db
-      - OLLAMA_URL_EMBEDDING=http://localhost:11434/api/embeddings
-      - OLLAMA_URL_GENERATE=http://localhost:11434/api/generate
       - EMBEDDING_MODEL=qwen3-embedding:0.6b
       - CSV_PATH=app/util/tipi/tipi_chapter_85.csv
       - CHROMA_DB_PATH=/app/db/chroma_db/collection
@@ -16,8 +14,8 @@ services:
     volumes:
       - .:/app
       - ./data:/app/data
-      - chroma_data:/app/db/chroma_db/collection  # Volume para persistir ChromaDB
-      - ollama_data:/root/.ollama     # Volume para persistir modelos Ollama
+      - chroma_data:/app/db/chroma_db/collection 
+      - ollama_data:/root/.ollama   
     depends_on:
       - db
     restart: unless-stopped
