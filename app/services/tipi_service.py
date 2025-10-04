@@ -17,6 +17,7 @@ def get_ncm(query: str) -> dict:
                 "ncm_code": r.ncm_code,
                 "description": r.description,
                 "distance": r.distance,
+                "aliquot": r.aliquot,
                 "is_parent": r.is_parent
             }
             for r in response.results
