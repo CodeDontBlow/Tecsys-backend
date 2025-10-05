@@ -8,6 +8,11 @@ ncm_chapter_85.csv
 
 
 #collection chromadb
+
+#tipi
+**/tipi_chapter_85.csv
+
+#chromadb
 collection/
 
 # Environment
