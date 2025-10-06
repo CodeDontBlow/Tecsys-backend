@@ -44,7 +44,7 @@ def main():
     run_command(["poetry", "run", "python", "-m", "app.scripts.setup"])
     
     print("Starting server...")
-    run_command(["poetry", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"])
+    run_command(["poetry", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"])
 
 if __name__ == "__main__":
     main()
