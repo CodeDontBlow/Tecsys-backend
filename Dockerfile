@@ -27,8 +27,8 @@ RUN poetry install --no-interaction --no-ansi
 
 COPY . .
 
-COPY docker-entrypoint.sh /docker-entrypoint.sh
-RUN chmod +x /docker-entrypoint.sh
+COPY docker-entrypoint.py /docker-entrypoint.py
+RUN chmod +x /docker-entrypoint.py
 
 EXPOSE 8000
-ENTRYPOINT ["/docker-entrypoint.sh"]
+ENTRYPOINT ["python", "/docker-entrypoint.py"]
