@@ -6,7 +6,6 @@ from pathlib import Path
 from app.db.chroma_db.config import CSV_PATH
 import re
 from collections import Counter
-import pandas as pd
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format='%(levelname)s - %(message)s')
@@ -26,7 +25,6 @@ def fetch_tipi_data(
 
     try:
         output_path.parent.mkdir(parents=True, exist_ok=True)
-
         logger.info(f"Fetching TIPI data from: {url}")
         resp = requests.get(url, timeout=60)
         resp.raise_for_status()
@@ -57,9 +55,9 @@ def fetch_tipi_data(
 def formated(text:str):
     stopwords = {"de", "a", "o", "os", "as", "em", "até", "com", "para", "e", "ou", "por", "na", "no"}
 
-    text = re.sub(r"[^\w\s]", " ", text.lower()) #transistores exceto os fototransistores
-    text_list = text.split() #["transistores" "exceto" "os" "fototransistores"]
-    return [t for t in text_list if t not in stopwords] #["Transistores" "exceto" "fototransistores"]
+    text = re.sub(r"[^\w\s]", " ", text.lower()) 
+    text_list = text.split() 
+    return [t for t in text_list if t not in stopwords] 
 
 def most_terms_repeated():
     csv:str = CSV_PATH
@@ -78,14 +76,8 @@ def most_terms_repeated():
     for term, freq in most_common_terms:
         print(f"{term}: {freq}")
 
-
-
 def formated_query(query: str) -> str:
-    """
-    Recebe uma descrição e retorna uma query enriquecida para embedding,
-    incluindo termos-chave detectados em diferentes categorias.
-    """
-    termos_chave = {
+    key_terms = {
         "geral": ["outros", "aparelhos", "elétricos", "superior", "inferior",
                   "montados", "incluindo", "exceto", "partes", "montagem"],
         "eletronicos": ["diodo", "led", "circuito", "transistor", "resistencia", "condensador",
@@ -121,7 +113,7 @@ def formated_query(query: str) -> str:
         detected_terms.append("reatância")
         detected_terms.append("autoindução")
 
-    for cat_terms in termos_chave.values():
+    for cat_terms in key_terms.values():
         for term in cat_terms:
             if term in words:
                 detected_terms.append(term)
