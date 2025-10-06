@@ -3,6 +3,11 @@
 __pycache__/
 *.pyc
 .pytest_cache/
+#csv tipi
+ncm_chapter_85.csv
+
+
+#collection chromadb
 
 #tipi
 **/tipi_chapter_85.csv
