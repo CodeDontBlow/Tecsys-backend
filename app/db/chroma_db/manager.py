@@ -47,10 +47,6 @@ class ChromaDBManager:
         return code
 
     def populate_from_csv(self, batch_size: int = 50):
-        """
-        Popula o ChromaDB a partir do CSV, processando em batches menores
-        e adicionando apenas NCM com 6 dígitos ou mais.
-        """
         if self.collection.count() > 0:
             logger.info(f"Collection already has {self.collection.count()} items.")
             return
@@ -117,8 +113,8 @@ class ChromaDBManager:
             ncm_results = []
             seen_parents = set()
             parent_count = 0
-            max_parents = 4
-            max_children = 7
+            max_parents =3
+            max_children = 3
 
             metas = results['metadatas'][0]
             docs = results['documents'][0]
@@ -168,7 +164,7 @@ class ChromaDBManager:
                 parent_count += 1
                 seen_parents.add(parent_code)
 
-                filhos = self.collection.query(
+                childrens = self.collection.query(
                     query_texts=[query_optimized],
                     where={"code_father": {"$eq": parent_code}},
                     n_results=max_children,
@@ -176,9 +172,9 @@ class ChromaDBManager:
                 )
 
                 for f_meta, f_doc, f_dist in zip(
-                    filhos['metadatas'][0],
-                    filhos['documents'][0],
-                    filhos['distances'][0]
+                    childrens['metadatas'][0],
+                    childrens['documents'][0],
+                    childrens['distances'][0]
                 ):
                     ncm_results.append(NCMResult(
                         ncm_code=self.format_ncm(f_meta['code_ncm']),
