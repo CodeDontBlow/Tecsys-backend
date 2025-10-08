@@ -1,3 +1,4 @@
+import asyncio
 from fastapi import APIRouter, UploadFile, File
 import tempfile
 from app.services.extract_service.enterPDF import EnterPDF
@@ -11,6 +12,6 @@ async def upload_pdf(pdf: UploadFile = File(...)):
         temp_file.flush()
         
         pdf_processor = EnterPDF(temp_file.name)
-        pdf_data = pdf_processor.process_enter()
-    
+        pdf_data = await asyncio.to_thread(pdf_processor.process_enter)
+        
     return pdf_data
