@@ -1,8 +1,7 @@
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import String, Integer, ForeignKey
 
 from app.model.base import Base
-
 
 class SupplyerProduct(Base):
     """Model for the relationship between suppliers and products."""
@@ -13,6 +12,10 @@ class SupplyerProduct(Base):
     product_id: Mapped[str] = mapped_column(Integer, ForeignKey("products.id"), nullable=False)
     erp_description: Mapped[str] = mapped_column(String(255), nullable=True)
 
-    supplyer: Mapped["Supplyer"] = relationship("Supplyer", back_populates="supplyer_products")
-    product: Mapped["Product"] = relationship("Product", back_populates="supplyer_products")
-    imports: Mapped[list["Import"]] = relationship("Import", back_populates="supplyer_product")
+    # supplyer: Mapped["Supplyer"] = relationship("Supplyer")
+    # product: Mapped["Product"] = relationship("Product")
+    
+    # imports: Mapped[list["Import"]] = relationship("Import")
+    # supplyer: Mapped["Supplyer"] = relationship("Supplyer", back_populates="supplyer_products")
+    # product: Mapped["Product"] = relationship("Product", back_populates="supplyer_products")
+    # imports: Mapped[list["Import"]] = relationship("Import", back_populates="supplyer_product")

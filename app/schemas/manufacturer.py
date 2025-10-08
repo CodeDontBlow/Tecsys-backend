@@ -13,3 +13,8 @@ class ManufacturerBase(BaseModel):
         "str_strip_whitespace": True,
         "orm_mode": True,
     }
+
+class ManufacturerUpdate(BaseModel):
+    name: str
+    address: str
+    origin_country: str

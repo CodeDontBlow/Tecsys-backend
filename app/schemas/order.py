@@ -13,3 +13,6 @@ class OrderBase(BaseModel):
         "str_strip_whitespace": True,
         "orm_mode": True,
     }
+
+class OrderUpdate(BaseModel):
+    order_date:str

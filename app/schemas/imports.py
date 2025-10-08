@@ -16,3 +16,7 @@ class ImportBase(BaseModel):
         "str_strip_whitespace": True,
         "orm_mode": True,
     }
+
+
+class ImportUpdate(BaseModel):
+    product_part_number: str

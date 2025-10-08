@@ -17,3 +17,6 @@ class SupplyerProductBase(BaseModel):
         "str_strip_whitespace": True,
         "orm_mode": True,
     }
+
+class SupplierProductUpdate(BaseModel): 
+    erp_description:str

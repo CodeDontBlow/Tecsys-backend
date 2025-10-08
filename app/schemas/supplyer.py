@@ -1,7 +1,6 @@
 from typing import Annotated
 from pydantic import BaseModel, Field
 
-
 class BaseSupplyer(BaseModel):
     '''Base schema for supplyer information'''
     id: Annotated[int, Field(title="ID", description="Unique identifier for the supplyer", examples=1)]
@@ -14,6 +13,6 @@ class BaseSupplyer(BaseModel):
         "orm_mode": True,
     }
 
-
-class SupplyerCreate(BaseSupplyer):
-    pass
+class SupplierUpdate(BaseModel): 
+    name:str
+    part_number:str
