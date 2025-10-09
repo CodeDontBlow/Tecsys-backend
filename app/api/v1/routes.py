@@ -8,7 +8,7 @@ from .supplier_product import api_router as supplier_product_router
 from .supplier import api_router as supplier_router
 from .ncm import api_router as ncm_router
 
-api_router = APIRouter(prefix="/v1") 
+api_router = APIRouter(prefix="/v1")
 api_router.include_router(pdf_router)
 api_router.include_router(imports_router)
 api_router.include_router(manufacturer_router)

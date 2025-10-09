@@ -4,15 +4,34 @@ from datetime import datetime
 
 
 class OrderBase(BaseModel):
-    '''Base schema for order information'''
-    id: Annotated[int, Field(title="ID", description="Unique identifier for the order", examples=1)]
-    order_date: Annotated[datetime, Field(title="Order Date", description="Date when the order was placed", examples="2023-10-05T14:48:00.000Z")]
+    """Base schema for order information"""
+    order_date: Annotated[
+        datetime,
+        Field(
+            title="Order Date",
+            description="Date when the order was placed",
+            examples=["2023-10-05T14:48:00.000Z"],
+        ),
+    ]
 
     model_config = {
         "extra": "forbid",
         "str_strip_whitespace": True,
-        "orm_mode": True,
+        "from_attributes": True,
     }
 
+
 class OrderUpdate(BaseModel):
-    order_date:str
+    order_date: Annotated[
+        datetime | None,
+        Field(
+            title="Order Date",
+            description="Date when the order was placed",
+            examples=["2023-10-05T14:48:00.000Z"],
+        ),
+    ]
+
+    model_config = {
+        "extra": "forbid",
+        "str_strip_whitespace": True,
+    }

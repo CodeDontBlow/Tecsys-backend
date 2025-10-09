@@ -5,6 +5,7 @@ from app.model.base import Base
 
 class Manufacturer(Base):
     """Model for the Manufacturers table."""
+
     __tablename__ = "manufacturers"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)

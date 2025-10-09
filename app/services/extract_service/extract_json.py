@@ -4,19 +4,19 @@ from app.services.extract_service.find_info import Find_info
 class Extract_json:
 
     def extract(txt):
-        supplyer = None
+        supplier = None
         products = []
         
         for linha in txt.splitlines():
-            if supplyer is None:
-                supplyer = Find_info.find_supplyer_name(linha)
+            if supplier is None:
+                supplier = Find_info.find_supplier_name(linha)
             
             product_info = Find_info.find_product_info(linha)
             if product_info:
                 products.append(product_info)
         
         return {
-            'supplyer': supplyer,
+            'supplier': supplier,
             'products': products
         }
 

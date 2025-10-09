@@ -3,7 +3,7 @@ from sqlalchemy import String, Integer
 from app.model.base import Base
 
 
-class Supplyer(Base):
+class Supplier(Base):
     """Model for suppliers table."""
     __tablename__ = "suppliers"
 

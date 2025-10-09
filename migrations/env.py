@@ -7,12 +7,12 @@ from alembic import context
 
 from app.core.config import settings
 from app.model.base import Base
-from app.model.imports import Import
+from app.model.imports import Imports
 from app.model.manufacturer import Manufacturer
 from app.model.order import Order
-from app.model.supplyer_product import SupplyerProduct
+from app.model.supplier_product import SupplierProduct
 from app.model.product import Product
-from app.model.supplyer import Supplyer
+from app.model.supplier import Supplier
 
 
 # this is the Alembic Config object, which provides
