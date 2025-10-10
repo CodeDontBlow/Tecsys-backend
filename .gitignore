@@ -254,3 +254,11 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 .vscode
+
+
+.github/
+
+
+app/services/extractor/1N4148W-TP.html
+
+app/services/extractor/NACE100M100V6.3X8TR13F.html
