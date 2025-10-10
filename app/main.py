@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
-from app.api.routers import api_router
+from app.api.router_global import api_router
 
 
 class App(FastAPI):
@@ -25,5 +25,4 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 app.include_router(api_router, prefix="/api")
