@@ -3,10 +3,10 @@ from fastapi import APIRouter, UploadFile, File
 import tempfile
 from app.services.extract_service.enterPDF import EnterPDF
 
-api_router = APIRouter(prefix="/pdf")
+router = APIRouter(prefix="/pdf")
 
 
-@api_router.post("/upload")
+@router.post("/upload")
 async def upload_pdf(pdf: UploadFile = File(...)):
     with tempfile.NamedTemporaryFile(delete=True, suffix=".pdf") as temp_file:
         temp_file.write(await pdf.read())

@@ -1,11 +1,12 @@
-from fastapi import APIRouter
-from app.services.tipi_service import get_ncm
+from fastapi import APIRouter, HTTPException
+from app.services import ncm_service
 
-api_router = APIRouter(prefix="/ncm")
+router = APIRouter(prefix="/ncm")
 
 
-@api_router.get("/preview")
-async def ncm_preview():
-    mock = "LED Verde, 2 mm, 5,2 mcd, 560 nm, SMD, If 20 mA, Vf 2,1 V, Ângulo 130°, Lente Dome"
-    result = get_ncm(mock)
-    return result
+@router.get("/")
+async def search_ncm(query: str = "LED Verde, 2 mm, 5,2 mcd, 560 nm, SMD, If 20 mA, Vf 2,1 V, Ângulo 130°, Lente Dome"):
+    try:
+        return ncm_service.get_ncm(query)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
