@@ -1,7 +1,7 @@
 from playwright.sync_api import sync_playwright
 from bs4 import BeautifulSoup
 
-def extrair_findchips(part_number, fornecedor_alvo=None):
+def extract_findchips(part_number, targed_supplier=None):
     url = f"https://www.findchips.com/search/{part_number}"
 
     with sync_playwright() as p:
@@ -12,27 +12,27 @@ def extrair_findchips(part_number, fornecedor_alvo=None):
         page.wait_for_selector("table", timeout=20000)
         page.wait_for_timeout(3000)
 
-        # Coleta todos os nomes de fornecedores
-        fornecedores = page.eval_on_selector_all(
+        # Collect all suppliers' name
+        suppliers = page.eval_on_selector_all(
             "h3",
             "elements => elements.map(el => el.textContent.trim()).filter(t => t.length > 0)"
         )
 
-        # Filtra “Most Popular Part Numbers”
-        fornecedores_validos = [f for f in fornecedores if "Most Popular" not in f]
+        # Filter “Most Popular Part Numbers”
+        valid_suppliers = [f for f in suppliers if "Most Popular" not in f]
 
-        fornecedor_encontrado = None
-        if fornecedor_alvo:
-            for f in fornecedores_validos:
-                if fornecedor_alvo.lower() in f.lower():
-                    fornecedor_encontrado = f
+        found_supplier = None
+        if targed_supplier:
+            for f in valid_suppliers:
+                if targed_supplier.lower() in f.lower():
+                    found_supplier = f
                     break
 
-        # Se não encontrar, pegar o primeiro fornecedor real
-        if not fornecedor_encontrado and fornecedores_validos:
-            fornecedor_encontrado = fornecedores_validos[0]
+        # If it doesn't find, it gets the first one
+        if not found_supplier and valid_suppliers:
+            found_supplier = valid_suppliers[0]
 
-        # Extrair o DISTI #
+        # Extract the DISTI #
         disti_number_js = page.eval_on_selector_all(
             "div, td, span",
             """elements => {
@@ -51,33 +51,33 @@ def extrair_findchips(part_number, fornecedor_alvo=None):
 
     soup = BeautifulSoup(html, "html.parser")
 
-    # pegar o part number principal
-    tabela = soup.find("table")
-    if not tabela:
-        return "Tabela não encontrada."
+    # Here, it get the main part number
+    table = soup.find("table")
+    if not table:
+        return "table not found."
 
-    part_number_produto = tabela.find("a")
-    part_number_produto = part_number_produto.get_text(strip=True) if part_number_produto else "N/A"
+    product_part_number = table.find("a")
+    product_part_number = product_part_number.get_text(strip=True) if product_part_number else "N/A"
 
-    linhas = tabela.find_all("tr")
-    if len(linhas) > 1:
-        colunas = linhas[1].find_all("td")
-        fabricante = colunas[1].get_text(strip=True) if len(colunas) > 1 else "N/A"
-        descricao = colunas[2].get_text(strip=True) if len(colunas) > 2 else "N/A"
+    rows = table.find_all("tr")
+    if len(rows) > 1:
+        columns = rows[1].find_all("td")
+        manufacturer = columns[1].get_text(strip=True) if len(columns) > 1 else "N/A"
+        description = columns[2].get_text(strip=True) if len(columns) > 2 else "N/A"
     else:
-        fabricante = descricao = "N/A"
+        manufacturer = description = "N/A"
 
     return {
-        "fornecedor": fornecedor_encontrado or "Desconhecido",
-        "part_number_produto": part_number_produto,
+        "supplier": found_supplier or "Desconhecido",
+        "product_part_number": product_part_number,
         "part_number_fornecedor": disti_number_js or "N/A",
-        "fabricante": fabricante,
-        "descricao": descricao
+        "manufacturer": manufacturer,
+        "description": description
     }
 
 
 if __name__ == "__main__":
     part_number = "1N4148W-TP"
-    fornecedor = "Newark"  # Pode trocar para testar com outro
-    resultado = extrair_findchips(part_number, fornecedor)
-    print(resultado)
+    supplier = "Newark" 
+    result = extract_findchips(part_number, supplier)
+    print(result)
