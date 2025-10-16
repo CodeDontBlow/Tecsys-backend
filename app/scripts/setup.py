@@ -35,13 +35,11 @@ def pull_ollama_model_embedding():
 def pull_ollama_model_description():
     try:
         caminho = os.path.abspath('./app/services/ollama_service/modelfile')
-        result = subprocess.run(
+        logger.info(f"Start pulling and create model based on modelfile ") 
+        subprocess.run(
             ['ollama', 'create', 'descriptum', '-f', caminho],
-            capture_output=True,
-            text=True,
-            check=True
         )
-        return result.stdout
+        logger.info(f"Success downloaded and created model Descriptum:latest")
         
     except subprocess.CalledProcessError as e:
         logger.info(f"Error in command execution: {e}")
