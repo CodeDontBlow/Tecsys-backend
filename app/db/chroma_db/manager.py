@@ -5,10 +5,8 @@ from app.db.chroma_db.model import NCMResult, Response
 import chromadb
 import pandas as pd
 import uuid
-import logging
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+from app.util.logger_info import setup_logger
+logger = setup_logger()
 
 class ChromaDBManager:
     def __init__(self):

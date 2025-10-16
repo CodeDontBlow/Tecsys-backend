@@ -3,22 +3,11 @@
 __pycache__/
 *.pyc
 .pytest_cache/
-#csv tipi
-ncm_chapter_85.csv
 
-
-#collection chromadb
-
-#tipi
+#config setup
 **/tipi_chapter_85.csv
-
-#chromadb
-#csv tipi
-ncm_chapter_85.csv
-
-
-#collection chromadb
 collection/
+log
 
 # Environment
 .env
