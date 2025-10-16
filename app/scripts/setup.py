@@ -1,5 +1,7 @@
 import subprocess
 import sys
+import os
+import ollama
 import logging
 from app.util.tipi.table_tipi import fetch_tipi_data
 from app.db.chroma_db.manager import chroma_manager
@@ -30,12 +32,33 @@ def pull_ollama_model_embedding():
         logger.error(f"Error downloaded: {EMBEDDING_MODEL}")
         sys.exit(1)
 
+def pull_ollama_model_description():
+    try:
+        caminho = os.path.abspath('./app/services/ollama_service/modelfile')
+        result = subprocess.run(
+            ['ollama', 'create', 'descriptum', '-f', caminho],
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        return result.stdout
+        
+    except subprocess.CalledProcessError as e:
+        logger.info(f"Error in command execution: {e}")
+        logger.info("Stderr:", e.stderr)
+        return None
+    except FileNotFoundError:
+        logger.info("Error: 'ollama command not found, check ollama is installed'.")
+        return None    
+ 
+
 def config_system_tools():
     try:
         logger.info("START CONFIG DOWNLOAD")
         logger.info("Ollama verify")
         check_ollama()
         pull_ollama_model_embedding()
+        pull_ollama_model_description()
         logger.info("Table TIPI verify")
         fetch_tipi_data()
         logger.info("Chromadb verify")
