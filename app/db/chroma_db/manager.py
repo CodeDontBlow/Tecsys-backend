@@ -5,22 +5,30 @@ from app.db.chroma_db.model import NCMResult, Response
 import chromadb
 import pandas as pd
 import uuid
-from app.util.logger_info import setup_logger
-logger = setup_logger()
+from app.log.logger import logger
+from chromadb.config import Settings
+
 
 class ChromaDBManager:
     def __init__(self):
-        self.client = chromadb.PersistentClient(path=CHROMA_DB_PATH)
+        logger.info("[CHROMADB] Initializing ChromaDB client...")
+        self.client = chromadb.PersistentClient(
+            path=CHROMA_DB_PATH,
+            settings=Settings(anonymized_telemetry=False)
+        )
         self.embedding = get_embedding_ollama()
         self.collection = self.get_or_create_collection()
+        logger.info(f"[CHROMADB] Connected to collection: {COLLECTION_NAME}")
 
     def get_or_create_collection(self):
         try:
+            logger.info("[CHROMADB] Getting existing collection...")
             return self.client.get_collection(
                 name=COLLECTION_NAME,
                 embedding_function=self.embedding
             )
-        except:
+        except Exception:
+            logger.warning("[CHROMADB] Collection not found. Creating new one...")
             return self.client.create_collection(
                 name=COLLECTION_NAME,
                 embedding_function=self.embedding
@@ -33,12 +41,12 @@ class ChromaDBManager:
         if len(code) == 6:
             return "parent", ""
         elif len(code) == 8:
-            return "child", code[:6]  
+            return "child", code[:6]
         return "unknown", ""
-    
+
     def format_ncm(self, code: str) -> str:
         code = code.strip()
-        if len(code) == 6:  
+        if len(code) == 6:
             return f"{code[:2]}{code[2:4]}.{code[4:]}"
         elif len(code) == 8:
             return f"{code[:2]}{code[2:4]}.{code[4:6]}.{code[6:]}"
@@ -46,13 +54,12 @@ class ChromaDBManager:
 
     def populate_from_csv(self, batch_size: int = 50):
         if self.collection.count() > 0:
-            logger.info(f"Collection already has {self.collection.count()} items.")
+            logger.info(f"[CHROMADB] Collection already has {self.collection.count()} items.")
             return
 
         df = pd.read_csv(CSV_PATH)
         total_items = len(df)
-        logger.info(f"Preparing to add {total_items} items in batches of {batch_size}.")
-
+        logger.info(f"[CHROMADB] Preparing to add {total_items} items in batches of {batch_size}.")
 
         ids_batch, documents_batch, metadatas_batch = [], [], []
 
@@ -62,9 +69,9 @@ class ChromaDBManager:
             aliquot = str(row.get("alíquota (%)", ""))
 
             code_digits = self.normalize_code(raw_code)
-
             if len(code_digits) < 6:
                 continue
+
             level, code_father = self.classify_ncm(code_digits)
 
             ids_batch.append(str(uuid.uuid4()))
@@ -84,24 +91,19 @@ class ChromaDBManager:
         if ids_batch:
             self._add_batch(ids_batch, documents_batch, metadatas_batch)
 
-        logger.info(f"Finished populating {total_items} items into the collection.")
+        logger.info(f"[CHROMADB] Finished populating {total_items} items into the collection.")
 
     def _add_batch(self, ids, documents, metadatas):
         try:
-            self.collection.add(
-                ids=ids,
-                documents=documents,
-                metadatas=metadatas
-            )
-            logger.info(f"Added batch of {len(ids)} items.")
+            self.collection.add(ids=ids, documents=documents, metadatas=metadatas)
+            logger.info(f"[CHROMADB] Added batch of {len(ids)} items.")
         except Exception as e:
-            logger.error(f"Error adding batch: {e}")
+            logger.error(f"[CHROMADB] Error adding batch: {e}")
 
     def search_ncm(self, query: str) -> Response:
         try:
             query_optimized = formated_query(query)
             print(query_optimized)
-
             results = self.collection.query(
                 query_texts=[query_optimized],
                 n_results=50,
@@ -111,7 +113,7 @@ class ChromaDBManager:
             ncm_results = []
             seen_parents = set()
             parent_count = 0
-            max_parents =3
+            max_parents = 3
             max_children = 3
 
             metas = results['metadatas'][0]
@@ -125,14 +127,13 @@ class ChromaDBManager:
 
                 parent_code = meta.get('code_father') or (code[:6] if len(code) >= 6 else code)
 
-
                 if parent_code in seen_parents:
                     continue
                 if parent_count >= max_parents:
                     break
 
                 parent_query = self.collection.query(
-                    query_texts=[query_optimized],           
+                    query_texts=[query_optimized],
                     where={"code_ncm": {"$eq": parent_code}},
                     n_results=1,
                     include=['metadatas', 'documents', 'distances']
@@ -182,10 +183,12 @@ class ChromaDBManager:
                         is_parent=False
                     ))
 
+            logger.info(f"[CHROMADB] Search completed successfully with {len(ncm_results)} results.")
             return Response(query=query, results=ncm_results)
 
         except Exception as e:
-            logger.error(f"Error: {e}")
+            logger.error(f"[CHROMADB] Error in search_ncm: {e}")
             return Response(query=query, results=[])
-        
+
+
 chroma_manager = ChromaDBManager()

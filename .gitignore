@@ -7,7 +7,7 @@ __pycache__/
 #config setup
 **/tipi_chapter_85.csv
 collection/
-log
+log/descriptum.log
 
 # Environment
 .env
