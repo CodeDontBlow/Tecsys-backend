@@ -1,11 +1,10 @@
 import subprocess
 import sys
 import os
-import ollama
-import logging
-from app.util.tipi.table_tipi import fetch_tipi_data
+
+from app.util.tipi import table_tipi
 from app.db.chroma_db.manager import chroma_manager
-from app.db.chroma_db.config import EMBEDDING_MODEL
+from app.db.chroma_db.config import EMBEDDING_MODEL, DESCRIPTUM_MODEL
 from app.log.logger import logger
 
 def check_ollama():
@@ -21,11 +20,14 @@ def check_ollama():
             for m in result_models.stdout.splitlines() if m.strip()
         ]
 
-        if EMBEDDING_MODEL in available_models:
-            logger.info(f"[OLLAMA] Embedding model '{EMBEDDING_MODEL}' is available.")
+        if EMBEDDING_MODEL in available_models and DESCRIPTUM_MODEL in available_models:
+            logger.info(f"[OLLAMA] Embedding model '{EMBEDDING_MODEL}' and '{DESCRIPTUM_MODEL}' is available.")
             return True
         else:
-            logger.warning(f"[OLLAMA] Embedding model '{EMBEDDING_MODEL}' not found. ❌")
+            if EMBEDDING_MODEL not in available_models:
+                logger.warning(f"[OLLAMA] Embedding model '{EMBEDDING_MODEL}' not found. ❌")
+            if DESCRIPTUM_MODEL not in available_models:
+                logger.warning(f"[OLLAMA] Descritpum model '{DESCRIPTUM_MODEL}' not found. ❌")
             return False
 
     except FileNotFoundError:
@@ -68,18 +70,18 @@ def pull_ollama_model_embedding():
 def pull_ollama_model_description():
     try:
         caminho = os.path.abspath('./app/services/ollama_service/modelfile')
-        logger.info(f"Start pulling and create model based on modelfile ") 
+        logger.info(f"[OLLAMA] Start pulling and create model based on modelfile ") 
         subprocess.run(
             ['ollama', 'create', 'descriptum', '-f', caminho],
         )
-        logger.info(f"Success downloaded and created model Descriptum:latest")
+        logger.info(f"[OLLAMA] Success downloaded and created model Descriptum:latest")
         
     except subprocess.CalledProcessError as e:
-        logger.info(f"Error in command execution: {e}")
-        logger.info("Stderr:", e.stderr)
+        logger.info(f"[OLLAMA] Error in command execution: {e}")
+        logger.info("[OLLAMA] Stderr:", e.stderr)
         return None
     except FileNotFoundError:
-        logger.info("Error: 'ollama command not found, check ollama is installed'.")
+        logger.info("[OLLAMA] Error: 'ollama command not found, check ollama is installed'.")
         return None    
  
 
@@ -89,8 +91,9 @@ def config_system_tools():
         
         if not model_exists:
             pull_ollama_model_embedding()
+            pull_ollama_model_description()
         else:
-            logger.info(f"[OLLAMA] Skipping model pull, '{EMBEDDING_MODEL}' already available.") 
+            logger.info(f"[OLLAMA] Skipping model pull, '{EMBEDDING_MODEL}' and '{DESCRIPTUM_MODEL}' already available.") 
 
         table_tipi.fetch_tipi_data()
         logger.info("[TIPI] File already exists or fetched successfully.")
