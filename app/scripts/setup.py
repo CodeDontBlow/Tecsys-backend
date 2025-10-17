@@ -1,10 +1,11 @@
 import subprocess
+import time
 import sys
 import os
 
 from app.util.tipi import table_tipi
 from app.db.chroma_db.manager import chroma_manager
-from app.db.chroma_db.config import EMBEDDING_MODEL, DESCRIPTUM_MODEL
+from app.db.chroma_db.config import EMBEDDING_MODEL, DESCRIPTUM_MODEL, CAMINHO_MODELFILE 
 from app.log.logger import logger
 
 def check_ollama():
@@ -37,6 +38,23 @@ def check_ollama():
         logger.error(f"[OLLAMA] Error checking Ollama: {e}")
         raise
 
+def loggings_downloading_periodically(process):
+    last_log_time = time.time()
+    log_interval = 30  
+    
+    while True:
+        line = process.stdout.readline()
+        if not line:
+            if process.poll() is not None:
+                break
+            time.sleep(0.1)
+            continue
+            
+        current_time = time.time()
+        if current_time - last_log_time >= log_interval:
+            logger.info(f"[OLLAMA] Still downloading... {line.strip()}")
+            last_log_time = current_time
+
 
 def pull_ollama_model_embedding():
     try:
@@ -47,12 +65,14 @@ def pull_ollama_model_embedding():
             stderr=subprocess.STDOUT,
             universal_newlines=True,
             encoding='utf-8', 
+            bufsize=1,
             errors='replace'
         )
         
-        for line in process.stdout:
-            logger.info(f"[OLLAMA] Ollama pull: {line.strip()}")
+        logger.info(f"[OLLAMA] Downloading model: '{EMBEDDING_MODEL}'... ")
             
+        loggings_downloading_periodically(process)
+    
         process.wait()
         
         if process.returncode == 0:
@@ -71,12 +91,27 @@ def pull_ollama_model_embedding():
 
 def pull_ollama_model_description():
     try:
-        caminho = os.path.abspath('./app/services/ollama_service/modelfile')
-        logger.info(f"[OLLAMA] Start pulling and create model based on modelfile ") 
-        subprocess.run(
+        caminho = os.path.abspath(CAMINHO_MODELFILE)
+        logger.info(f"[OLLAMA] Start pulling and create model '{DESCRIPTUM_MODEL}' based on modelfile ") 
+        process = subprocess.Popen(
             ['ollama', 'create', 'descriptum', '-f', caminho],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            universal_newlines=True,
+            encoding='utf-8', 
+            bufsize=1,
+            errors='replace'
         )
-        logger.info(f"[OLLAMA] Success downloaded and created model Descriptum:latest")
+
+        logger.info(f"[OLLAMA] Downloading model: 'qwen3:1.7b'...")
+
+        loggings_downloading_periodically(process)
+
+        process.wait()
+        
+        if process.returncode == 0:
+            logger.info(f"[OLLAMA] Success downloaded and created model '{DESCRIPTUM_MODEL}'")
+
         
     except subprocess.CalledProcessError as e:
         logger.info(f"[OLLAMA] Error in command execution: {e}")
