@@ -45,7 +45,9 @@ def pull_ollama_model_embedding():
             ["ollama", "pull", EMBEDDING_MODEL],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
-            universal_newlines=True
+            universal_newlines=True,
+            encoding='utf-8', 
+            errors='replace'
         )
         
         for line in process.stdout:
