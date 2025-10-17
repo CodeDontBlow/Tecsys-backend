@@ -1,83 +1,63 @@
-from playwright.sync_api import sync_playwright
 from bs4 import BeautifulSoup
+from pathlib import Path
 
-def extract_findchips(part_number, targed_supplier=None):
-    url = f"https://www.findchips.com/search/{part_number}"
 
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False, slow_mo=150)
-        page = browser.new_page()
-        print(f"[INFO] Acessando {url}...")
-        page.goto(url, timeout=60000)
-        page.wait_for_selector("table", timeout=20000)
-        page.wait_for_timeout(3000)
 
-        # Collect all suppliers' name
-        suppliers = page.eval_on_selector_all(
-            "h3",
-            "elements => elements.map(el => el.textContent.trim()).filter(t => t.length > 0)"
-        )
+BASE_DIR = Path(__file__).resolve().parents[3]
+html_path = BASE_DIR/"app"/"scripts"/"web-scraping"/"scraper_results"/"scrape_2025-10-16_21-42-31"/"NACE100M100V6.3X8TR13F.html"
 
-        # Filter “Most Popular Part Numbers”
-        valid_suppliers = [f for f in suppliers if "Most Popular" not in f]
 
-        found_supplier = None
-        if targed_supplier:
-            for f in valid_suppliers:
-                if targed_supplier.lower() in f.lower():
-                    found_supplier = f
-                    break
+def extract_from_html(html_path):
+    with open(html_path, "r", encoding="utf-8") as f:
+        html_content = f.read()
 
-        # If it doesn't find, it gets the first one
-        if not found_supplier and valid_suppliers:
-            found_supplier = valid_suppliers[0]
+    soup = BeautifulSoup(html_content, "html.parser")
 
-        # Extract the DISTI #
-        disti_number_js = page.eval_on_selector_all(
-            "div, td, span",
-            """elements => {
-                for (const el of elements) {
-                    if (el.textContent && el.textContent.includes('DISTI #')) {
-                        const match = el.textContent.match(/DISTI #\\s*([A-Za-z0-9\\-_.]+)/);
-                        if (match) return match[1];
-                    }
-                }
-                return '';
-            }"""
-        )
+    # Extrair fornecedor (primeiro h3 válido)
+    supplier_tag = soup.find("h3")
+    supplier = supplier_tag.get_text(strip=True) if supplier_tag else "Desconhecido"
+    if "Most Popular" in supplier:
+        supplier = "Desconhecido"
 
-        html = page.content()
-        browser.close()
+    # Extrair part number principal
+    product_part = soup.find("a")
+    product_part_number = product_part.get_text(strip=True) if product_part else "N/A"
 
-    soup = BeautifulSoup(html, "html.parser")
+    # Procurar o DISTI #
+    disti_number = None
+    for tag in soup.find_all(["div", "td", "span"]):
+        text = tag.get_text(" ", strip=True)
+        if "DISTI #" in text:
+            match = text.split("DISTI #")[-1].strip()
+            if match:
+                disti_number = match
+                break
+    if not disti_number:
+        disti_number = "N/A"
 
-    # Here, it get the main part number
+    # Fabricante e descrição
     table = soup.find("table")
-    if not table:
-        return "table not found."
-
-    product_part_number = table.find("a")
-    product_part_number = product_part_number.get_text(strip=True) if product_part_number else "N/A"
-
-    rows = table.find_all("tr")
-    if len(rows) > 1:
-        columns = rows[1].find_all("td")
-        manufacturer = columns[1].get_text(strip=True) if len(columns) > 1 else "N/A"
-        description = columns[2].get_text(strip=True) if len(columns) > 2 else "N/A"
+    if table:
+        rows = table.find_all("tr")
+        if len(rows) > 1:
+            cols = rows[1].find_all("td")
+            manufacturer = cols[1].get_text(strip=True) if len(cols) > 1 else "N/A"
+            description = cols[2].get_text(strip=True) if len(cols) > 2 else "N/A"
+        else:
+            manufacturer = description = "N/A"
     else:
         manufacturer = description = "N/A"
 
     return {
-        "supplier": found_supplier or "Desconhecido",
+        "supplier": supplier,
         "product_part_number": product_part_number,
-        "part_number_fornecedor": disti_number_js or "N/A",
+        "part_number_fornecedor": disti_number,
         "manufacturer": manufacturer,
-        "description": description
+        "description": description,
     }
 
 
 if __name__ == "__main__":
-    part_number = "1N4148W-TP"
-    supplier = "Newark" 
-    result = extract_findchips(part_number, supplier)
+    html_file = BASE_DIR/"app"/"scripts"/"web-scraping"/"scraper_results"/"scrape_2025-10-16_21-42-31"/"NACE100M100V6.3X8TR13F.html"
+    result = extract_from_html(html_file)
     print(result)
