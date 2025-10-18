@@ -1,12 +1,15 @@
 from pydantic import ValidationError
 import pytest
 from app.model.imports import Imports
+from app.repositories.repository_interface import RepositoryInterface
 from app.schemas.imports import ImportCreate, ImportUpdate
 from app.repositories.imports_repository import ImportsRepository
 
 
 @pytest.fixture
-def import_repository(repository_factory) -> ImportsRepository:
+def import_repository(
+    repository_factory,
+) -> RepositoryInterface[ImportCreate, ImportUpdate, Imports]:
     """Fixture to provide an instace of ImportsRepository."""
     return repository_factory(Imports, ImportsRepository)
 
@@ -41,11 +44,12 @@ def test_invalid_create_import_instance():
 
 @pytest.mark.asyncio
 async def test_create_import_must_be_success(
-    import_repository: ImportsRepository, create_import_instance: ImportCreate
+    import_repository: RepositoryInterface[ImportCreate, ImportUpdate, Imports],
+    create_import_instance: ImportCreate,
 ) -> None:
     """Test that creating an import is successful."""
 
-    new_import = await import_repository.create(create_import_instance)
+    new_import = await import_repository.save(create_import_instance)
 
     assert new_import is not None
     assert new_import.id is not None

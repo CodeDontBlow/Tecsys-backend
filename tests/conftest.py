@@ -2,6 +2,7 @@ import asyncio
 from typing import AsyncGenerator, Type
 import pytest
 import pytest_asyncio
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -25,6 +26,7 @@ session_maker = sessionmaker(test_engine, class_=AsyncSession, expire_on_commit=
 async def create_db_and_tables():
     """Create the database and tables for testing."""
     async with test_engine.begin() as conn:
+        await conn.execute(text("PRAGMA foreign_keys=ON"))
         await conn.run_sync(Base.metadata.create_all)
 
 
