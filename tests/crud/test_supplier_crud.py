@@ -31,7 +31,7 @@ def test_invalid_pn_lenght_supplier_instace_must_raise_error() -> None:
 
 
 @pytest.mark.asyncio
-async def test_create_supplier_must_be_success(
+async def test_save_supplier_must_be_success(
     supplier_repository: RepositoryInterface[SupplierCreate, SupplierUpdate, Supplier],
     create_supplier_instance: SupplierCreate,
 ) -> None:
