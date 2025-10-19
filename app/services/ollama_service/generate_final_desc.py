@@ -1,5 +1,4 @@
 import asyncio, time
-from .llm_settings import Llm_settings
 from .clean_response import Clean_response
 from ollama import AsyncClient
 
@@ -10,9 +9,6 @@ class Generate_final_desc:
         print(f"Total descriptions to process:{len(erp_desc)}")
         
         llm_description = 'descriptum:latest'
-
-        if not Llm_settings.check_model_exists(llm_description):
-            Llm_settings.create_ollama_model()
 
         client = AsyncClient()
         

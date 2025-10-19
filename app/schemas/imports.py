@@ -53,28 +53,6 @@ class ImportUpdate(BaseModel):
         ),
     ]
 
-    order_id: Annotated[
-        int | None,
-        Field(
-            title="Order ID",
-            description="Unique identifier for the order associated with the import",
-            examples=[1],
-        ),
-    ]
-
-    manufacturer: Annotated[
-        ManufacturerBase | None,
-        Field(
-            title="Manufacturer Information",
-            description="Details of the manufacturer",
-            examples=[{
-                "name": "Manufacturer ABC",
-                "origin_country": "Country XYZ",
-                "address": "1234 Industrial Rd, City, Country",
-            }],
-        ),
-    ]
-
     model_config = {
         "extra": "forbid",
         "str_strip_whitespace": True,
