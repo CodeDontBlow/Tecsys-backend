@@ -3,13 +3,8 @@
 __pycache__/
 *.pyc
 .pytest_cache/
-#csv tipi
-ncm_chapter_85.csv
 
-
-#collection chromadb
-
-#tipi
+#config setup
 **/tipi_chapter_85.csv
 
 mouser.pdf
@@ -23,6 +18,7 @@ ncm_chapter_85.csv
 
 #collection chromadb
 collection/
+log/descriptum.log
 
 # Environment
 .env
