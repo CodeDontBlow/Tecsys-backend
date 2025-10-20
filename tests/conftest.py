@@ -1,5 +1,5 @@
 import asyncio
-from typing import AsyncGenerator, Type
+from typing import AsyncGenerator, Type, Tuple
 import pytest
 import pytest_asyncio
 from sqlalchemy import text
@@ -13,6 +13,10 @@ from app.model.product import Product
 from app.model.supplier import Supplier
 from app.model.order import Order
 from app.model.supplier_product import SupplierProduct
+from app.repositories.product_repository import ProductRepository
+from app.repositories.supplier_repository import SupplierRepository
+from app.schemas.product import ProductCreate
+from app.schemas.supplier import SupplierCreate
 
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 
@@ -62,3 +66,19 @@ async def repository_factory(get_test_session: AsyncSession):
         return repo_cls(db_session=get_test_session, model=model_cls)
 
     return _factory
+
+@pytest_asyncio.fixture
+async def create_supplier_and_product(repository_factory) -> Tuple[Supplier, Product]:
+    """Create a supplier and a product for testing purposes."""
+    supplier_repo = repository_factory(Supplier, SupplierRepository)
+    product_repo = repository_factory(Product, ProductRepository)
+
+    supplier = await supplier_repo.save(
+        SupplierCreate(name="Supplier Test", part_number="PN12345")
+    )
+
+    product = await product_repo.save(
+        ProductCreate(ncm="PN12345", final_description="Supplier Test")
+    )
+
+    return supplier, product

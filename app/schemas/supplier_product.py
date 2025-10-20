@@ -41,5 +41,28 @@ class SupplierProductCreate(SupplierProductBase):
     pass
 
 
-class SupplierProductUpdate(BaseModel):
-    erp_description: str
+class SupplierProductUpdate(SupplierProductBase):
+    supplier_id: Annotated[
+        int | None,
+        Field(
+            title="Supplier ID",
+            description="Unique identifier for the supplier",
+            examples=[1],
+        ),
+    ]
+    product_id: Annotated[
+        int | None,
+        Field(
+            title="Product id", description="Primary key id of the product", examples=[1]
+        ),
+    ]
+    erp_description: Annotated[
+        str | None,
+        Field(
+            title="Product ERP description",
+            description="ERP description of the product extracted from pdf",
+            examples=["Some product description"],
+        ),
+    ]
+
+    model_config = SupplierProductBase.model_config

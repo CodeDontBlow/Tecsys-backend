@@ -16,13 +16,13 @@ class OrderRepository(RepositoryInterface[OrderCreate, OrderUpdate, Order]):
         """Create a new supplier record in the database."""
         orrder_dict = obj_data.model_dump()
 
-        new_product = Order(**orrder_dict)
+        new_order = Order(**orrder_dict)
 
         try:
-            self.db_session.add(new_product)
+            self.db_session.add(new_order)
             await self.db_session.commit()
-            await self.db_session.refresh(new_product)
-            return new_product
+            await self.db_session.refresh(new_order)
+            return new_order
         except SQLAlchemyError as e:
             await self.db_session.rollback()
             raise e

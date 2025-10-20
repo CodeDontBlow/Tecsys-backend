@@ -1,4 +1,4 @@
-from typing import List, Optional, Type
+from typing import List, Type
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -31,7 +31,7 @@ class ManufacturerRepository(
     async def list_all(self) -> List[Manufacturer]:
         pass
 
-    async def get_by_id(self, obj_id: int) -> Optional[Manufacturer]:
+    async def get_by_id(self, obj_id: int) -> Manufacturer:
         pass
 
     async def update(self, obj_data: ManufacturerUpdate) -> Manufacturer:
