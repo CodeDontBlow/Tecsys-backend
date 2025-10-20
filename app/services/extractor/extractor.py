@@ -4,7 +4,15 @@ from pathlib import Path
 
 
 BASE_DIR = Path(__file__).resolve().parents[3]
-html_path = BASE_DIR/"app"/"scripts"/"web-scraping"/"scraper_results"/"scrape_2025-10-16_21-42-31"/"NACE100M100V6.3X8TR13F.html"
+SCRAPER_RESULTS_DIR = BASE_DIR / "app" / "services"/ "extractor" / "web-scraping" / "scraper_results"
+
+
+def get_latest_scrape_dir(base_dir: Path) -> Path:
+    """Retorna o diretório mais recente dentro de scraper_results/"""
+    scrape_dirs = [d for d in base_dir.iterdir() if d.is_dir() and d.name.startswith("scrape_")]
+    if not scrape_dirs:
+        raise FileNotFoundError("Nenhum diretório 'scrape_' encontrado em scraper_results/")
+    return max(scrape_dirs, key=lambda d: d.stat().st_mtime)
 
 
 def extract_from_html(html_path):
@@ -58,6 +66,8 @@ def extract_from_html(html_path):
 
 
 if __name__ == "__main__":
-    html_file = BASE_DIR/"app"/"scripts"/"web-scraping"/"scraper_results"/"scrape_2025-10-16_21-42-31"/"NACE100M100V6.3X8TR13F.html"
+
+    latest_scrape_dir = get_latest_scrape_dir(SCRAPER_RESULTS_DIR)
+    html_file = latest_scrape_dir / "NACE100M100V6.3X8TR13F.html"
     result = extract_from_html(html_file)
     print(result)

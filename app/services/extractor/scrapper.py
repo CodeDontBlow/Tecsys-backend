@@ -11,7 +11,7 @@ HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
 DEFAULT_SLEEP_BETWEEN_REQUESTS = 1.0
 REQUESTS_TIMEOUT = 20
 
-OUTPUT_DIR = os.path.join("app", "scripts", "web-scraping", "scraper_results", f"scrape_{time.strftime('%Y-%m-%d_%H-%M-%S')}")
+OUTPUT_DIR = os.path.join("app", "services", "extractor" ,"web-scraping", "scraper_results", f"scrape_{time.strftime('%Y-%m-%d_%H-%M-%S')}")
 
 def ensure_dir(outdir):
     os.makedirs(outdir, exist_ok=True)
