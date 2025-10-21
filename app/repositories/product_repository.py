@@ -5,12 +5,13 @@ from typing import Type, Optional, List
 
 # Local imports
 from app.model.product import Product
+from app.repositories.repository_interface import RepositoryInterface
 from app.schemas.product import ProductCreate, ProductUpdate
 
 
-class ProductRepository:
+class ProductRepository(RepositoryInterface[ProductCreate, ProductUpdate, Product]):
     def __init__(self, db_session: AsyncSession, model: Type[Product]):
-        self.db_session = db_session
+        self._db_session = db_session
         self.model = model
 
     async def save(self, obj_data: ProductCreate) -> Product:
@@ -20,12 +21,12 @@ class ProductRepository:
         new_product = Product(**product_dict)
 
         try:
-            self.db_session.add(new_product)
-            await self.db_session.commit()
-            await self.db_session.refresh(new_product)
+            self._db_session.add(new_product)
+            await self._db_session.commit()
+            await self._db_session.refresh(new_product)
             return new_product
         except SQLAlchemyError as e:
-            await self.db_session.rollback()
+            await self._db_session.rollback()
             raise e
 
     async def list_all(self) -> List[Product]:

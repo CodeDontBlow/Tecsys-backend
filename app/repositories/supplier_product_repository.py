@@ -14,7 +14,7 @@ class SupplierProductRepository(
 ):
     def __init__(self, db_session: AsyncSession, model: Type[SupplierProduct]):
         self._db_session = db_session
-        self.model = model
+        self._model = model
 
     async def save(self, obj_data) -> SupplierProduct:
         """

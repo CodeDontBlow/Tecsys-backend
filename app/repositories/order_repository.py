@@ -9,22 +9,22 @@ from app.schemas.order import OrderCreate, OrderUpdate
 
 class OrderRepository(RepositoryInterface[OrderCreate, OrderUpdate, Order]):
     def __init__(self, db_session: AsyncSession, model: Type[Order]):
-        self.db_session = db_session
-        self.model = model
+        self._db_session = db_session
+        self._model = model
 
     async def save(self, obj_data: OrderCreate) -> Order:
         """Create a new supplier record in the database."""
-        orrder_dict = obj_data.model_dump()
+        order_dict = obj_data.model_dump()
 
-        new_order = Order(**orrder_dict)
+        new_order = Order(**order_dict)
 
         try:
-            self.db_session.add(new_order)
-            await self.db_session.commit()
-            await self.db_session.refresh(new_order)
+            self._db_session.add(new_order)
+            await self._db_session.commit()
+            await self._db_session.refresh(new_order)
             return new_order
         except SQLAlchemyError as e:
-            await self.db_session.rollback()
+            await self._db_session.rollback()
             raise e
 
     async def list_all(self) -> List[Order]:

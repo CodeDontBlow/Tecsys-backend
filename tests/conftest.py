@@ -67,6 +67,7 @@ async def repository_factory(get_test_session: AsyncSession):
 
     return _factory
 
+
 @pytest_asyncio.fixture
 async def create_supplier_and_product(repository_factory) -> Tuple[Supplier, Product]:
     """Create a supplier and a product for testing purposes."""

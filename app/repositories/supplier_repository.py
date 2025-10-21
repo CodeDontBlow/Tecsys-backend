@@ -12,7 +12,7 @@ from app.schemas.supplier import SupplierCreate, SupplierUpdate
 class SupplierRepository(RepositoryInterface[SupplierCreate, SupplierUpdate, Supplier]):
     def __init__(self, db_session: AsyncSession, model: Type[Supplier]):
         self._db_session = db_session
-        self.model = model
+        self._model = model
 
     async def save(self, obj_data: SupplierCreate) -> Supplier:
         """Create a new supplier record in the database."""

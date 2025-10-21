@@ -90,7 +90,7 @@ def create_import_instance(
 #     return ImportUpdate(product_part_number="54321-DEF")
 
 
-def test_invalid_create_import_instance():
+def test_invalid_create_import_instance_must_raises_exc():
     """Test that creating an ImportCreate instance with invalid data raises a ValidationError."""
     with pytest.raises(ValidationError):
         ImportCreate(
