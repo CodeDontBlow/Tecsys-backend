@@ -52,3 +52,8 @@ class SupplierUpdate(BaseModel):
         "extra": "forbid",
         "str_strip_whitespace": True,
     }
+
+class SupplierResponse(BaseModel):
+    id: int
+    name: str
+    part_number: str

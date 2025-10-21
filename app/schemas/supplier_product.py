@@ -1,7 +1,8 @@
 from typing import Annotated
+from app.schemas.supplier import SupplierResponse
 from pydantic import BaseModel, Field
 
-from app.schemas.product import ProductBase
+from app.schemas.product import ProductBase, ProductResponse
 
 
 class SupplierProductBase(BaseModel):
@@ -55,3 +56,19 @@ class SupplierProductBase(BaseModel):
 
 class SupplierProductUpdate(BaseModel):
     erp_description: str
+
+class SupplierProductResponse(BaseModel):
+    id: int
+    erp_description: str
+    supplier: SupplierResponse
+    product: ProductResponse
+
+
+    #   id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    # supplier_id: Mapped[int] = mapped_column(
+    #     Integer, ForeignKey("suppliers.id"), nullable=False
+    # )
+    # product_id: Mapped[str] = mapped_column(
+    #     Integer, ForeignKey("products.id"), nullable=False
+    # )
+    # erp_description: Mapped[str] = mapped_column(String(255), nullable=True)

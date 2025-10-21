@@ -1,6 +1,6 @@
 from typing import Annotated
 from pydantic import BaseModel, Field
-from datetime import datetime
+from datetime import datetime, date
 
 
 class OrderBase(BaseModel):
@@ -35,3 +35,7 @@ class OrderUpdate(BaseModel):
         "extra": "forbid",
         "str_strip_whitespace": True,
     }
+
+class OrderResponse(BaseModel):
+    id: int
+    order_date: date
