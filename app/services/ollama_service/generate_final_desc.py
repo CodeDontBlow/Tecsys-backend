@@ -1,27 +1,23 @@
 import asyncio, time
-from .llm_settings import Llm_settings
 from .clean_response import Clean_response
 from ollama import AsyncClient
 
 class Generate_final_desc:
 
     @staticmethod
-    async def generate_final_desc_async(erp_desc, supplyer_desc):
+    async def generate_final_desc_async(erp_desc, supplier_desc):
         print(f"Total descriptions to process:{len(erp_desc)}")
         
         llm_description = 'descriptum:latest'
-
-        if not Llm_settings.check_model_exists(llm_description):
-            Llm_settings.create_ollama_model()
 
         client = AsyncClient()
         
         tasks = []
         for i, (codigo, descricao) in enumerate(erp_desc.items(), 1):
-            print(f"  {i}. Código: {codigo} - Descrição: {descricao[:50]} {supplyer_desc}...")
+            print(f"  {i}. Código: {codigo} - Descrição: {descricao[:50]} {supplier_desc}...")
 
 
-            task = client.generate(llm_description, descricao + ' ' + supplyer_desc)
+            task = client.generate(llm_description, descricao + ' ' + supplier_desc)
 
             tasks.append(task)
         

@@ -2,13 +2,13 @@ import re
 
 class Find_info:
 
-    def find_supplyer_name(linha):
+    def find_supplier_name(linha):
         if "Company:" in linha:
-            supplyer_with_code = linha.split("Company:")[1].strip()
+            supplier_with_code = linha.split("Company:")[1].strip()
             
-            supplyer = supplyer_with_code.split('(')[0].strip()
+            supplier = supplier_with_code.split('(')[0].strip()
 
-            return supplyer
+            return supplier
         return None
 
     def find_product_info(linha):
