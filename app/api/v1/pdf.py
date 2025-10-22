@@ -11,13 +11,11 @@ router = APIRouter(prefix="/pdf")
 async def upload_pdf(pdf: UploadFile = File(...)):
     logger.info("[PDF] POST /pdf/upload")
     logger.info(f"[PDF] Received file: {pdf.filename}")
-    try:
-        with tempfile.NamedTemporaryFile(delete=True, suffix=".pdf") as temp_file:
-            temp_file.write(await pdf.read())
-            temp_file.flush()
 
-            pdf_processor = EnterPDF(temp_file.name)
-            pdf_data = await asyncio.to_thread(pdf_processor.process_enter)
+    try:
+        pdf_bytes = await pdf.read()
+        pdf_processor = EnterPDF(pdf_bytes)
+        pdf_data = await asyncio.to_thread(pdf_processor.process_enter)
 
         logger.info(f"[PDF] File processed successfully: {pdf.filename}")
         return pdf_data

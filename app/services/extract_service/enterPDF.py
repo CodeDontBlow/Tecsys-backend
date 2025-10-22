@@ -5,14 +5,14 @@ from app.services.extract_service.find_info import Find_info
 
 
 class EnterPDF:
-    def __init__(self, path_pdf):
-        self.path_pdf = path_pdf
+    def __init__(self, bytes_pdf):
+        self.bytes_pdf = bytes_pdf
         self.text = None
         self.data = None
 
     def process_enter(self):
-        """Método principal de entrada"""
-        self.text = pdf_to_text(self.path_pdf)
+        """principal method enter(to extract)"""
+        self.text = pdf_to_text(self.bytes_pdf)
         self.data = json.loads(Extract_json.return_Datajson(self.text))
 
         return self.data
@@ -22,21 +22,21 @@ class EnterPDF:
 
     def get_erp_desc(self):
         desc = {
-            mercadoria["numero"]: mercadoria["nome"]
-            for mercadoria in self.data.values()
+            product["number"]: product["name"]
+            for product in self.data.values()
         }
         return desc
 
     def get_pn(self):
         pn = {
-            mercadoria["numero"]: mercadoria["part_number"]
-            for mercadoria in self.data.values()
+            product["number"]: product["part_number"]
+            for product in self.data.values()
         }
         return pn
 
     def get_erp_code(self):
         code = {
-            mercadoria["numero"]: mercadoria["codigo_erp"]
-            for mercadoria in self.data.values()
+            product["number"]: product["erp_code"]
+            for product in self.data.values()
         }
         return code
