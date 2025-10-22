@@ -6,15 +6,6 @@ from app.schemas.product import ProductBase
 
 class SupplierProductBase(BaseModel):
     """Base schema for supplier-product relationship"""
-
-    id: Annotated[
-        int,
-        Field(
-            title="ID",
-            description="Unique identifier for the supplier-product relationship",
-            examples=[1],
-        ),
-    ]
     supplier_id: Annotated[
         int,
         Field(
@@ -29,19 +20,11 @@ class SupplierProductBase(BaseModel):
             title="Product id", description="Primary key id of the product", examples=[1]
         ),
     ]
-    product_ncm: Annotated[
+    erp_description: Annotated[
         str,
         Field(
-            title="Product NCM code",
-            description="NCM code of the product",
-            examples=["87032100"],
-        ),
-    ]
-    product: Annotated[
-        ProductBase,
-        Field(
-            title="Product Final description",
-            description="Final description of the product by LLM Model",
+            title="Product ERP description",
+            description="ERP description of the product extracted from pdf",
             examples=["Some product description"],
         ),
     ]
@@ -53,5 +36,33 @@ class SupplierProductBase(BaseModel):
     }
 
 
-class SupplierProductUpdate(BaseModel):
-    erp_description: str
+class SupplierProductCreate(SupplierProductBase):
+    """Schema for creating a supplier-product relationship"""
+    pass
+
+
+class SupplierProductUpdate(SupplierProductBase):
+    supplier_id: Annotated[
+        int | None,
+        Field(
+            title="Supplier ID",
+            description="Unique identifier for the supplier",
+            examples=[1],
+        ),
+    ]
+    product_id: Annotated[
+        int | None,
+        Field(
+            title="Product id", description="Primary key id of the product", examples=[1]
+        ),
+    ]
+    erp_description: Annotated[
+        str | None,
+        Field(
+            title="Product ERP description",
+            description="ERP description of the product extracted from pdf",
+            examples=["Some product description"],
+        ),
+    ]
+
+    model_config = SupplierProductBase.model_config
