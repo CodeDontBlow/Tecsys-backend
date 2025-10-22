@@ -2,12 +2,11 @@ from typing import Annotated
 from app.schemas.order import OrderResponse
 from app.schemas.supplier_product import SupplierProductResponse
 from pydantic import BaseModel, Field
-from app.schemas.manufacturer import ManufacturerResponse
+from app.schemas.manufacturer import ManufacturerBase, ManufacturerResponse
 
 
 class ImportBase(BaseModel):
     """Base schema for import information"""
-
     product_part_number: Annotated[
         str,
         Field(

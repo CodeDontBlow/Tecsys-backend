@@ -1,8 +1,6 @@
 from typing import Annotated
 from pydantic import BaseModel, Field
 
-from app.schemas.product import ProductBase
-
 
 class BaseSupplier(BaseModel):
     """Base schema for supplier information"""
@@ -21,7 +19,8 @@ class BaseSupplier(BaseModel):
             title="Part Number",
             description="Part number of the supplier",
             examples=["12345-XYZ"],
-            max_length=30
+            max_length=30,
+            min_length=1,
         ),
     ]
 
@@ -55,7 +54,7 @@ class SupplierUpdate(BaseSupplier):
         ),
     ]
 
-    model_config = ProductBase.model_config
+    model_config = BaseSupplier.model_config
 
 
 class SupplierResponse(BaseModel):

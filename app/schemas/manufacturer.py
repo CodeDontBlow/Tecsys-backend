@@ -43,7 +43,7 @@ class ManufacturerCreate(ManufacturerBase):
     pass
 
 
-class ManufacturerUpdate(ManufacturerBase):
+class ManufacturerUpdate(BaseModel):
     name: Annotated[
         str | None,
         Field(

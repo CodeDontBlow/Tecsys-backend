@@ -4,6 +4,7 @@ from typing import Annotated
 
 class ProductBase(BaseModel):
     """Base schema for product information"""
+
     ncm: Annotated[
         str,
         Field(
