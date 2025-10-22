@@ -6,6 +6,17 @@ __pycache__/
 
 #config setup
 **/tipi_chapter_85.csv
+
+mouser.pdf
+
+
+
+#chromadb
+#csv tipi
+ncm_chapter_85.csv
+
+
+#collection chromadb
 collection/
 log/descriptum.log
 
@@ -188,7 +199,7 @@ env-embedding
 #pdfs
 INVOICE TECSYS.pdf
 exemplo_pdf_entrada.pdf
-
+Pedido compras_Mouser.pdf
 # mkdocs documentation
 /site
 

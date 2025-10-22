@@ -1,7 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import Annotated
 
-
 class ProductBase(BaseModel):
     """Base schema for product information"""
 
@@ -52,3 +51,8 @@ class ProductUpdate(BaseModel):
             # examples="",
         ),
     ]
+
+
+class ProductResponse(BaseModel):
+    id: int
+    description_di: str = Field(alias="final_description")     

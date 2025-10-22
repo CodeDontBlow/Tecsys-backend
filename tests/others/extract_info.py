@@ -10,4 +10,3 @@ nome = pdf_processado1.get_supplier_name()
 descs = pdf_processado1.get_erp_desc()
 pns = pdf_processado1.get_pn()
 codes = pdf_processado1.get_erp_code()
-
