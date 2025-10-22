@@ -6,7 +6,9 @@ from pathlib import Path
 from app.db.chroma_db.config import CSV_PATH
 import re
 from collections import Counter
-from app.log.logger import logger
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO, format='%(levelname)s - %(message)s')
 
 #------------- fetch tipi data -------------
 def fetch_tipi_data(
@@ -18,34 +20,34 @@ def fetch_tipi_data(
     
     output_path = Path(output_csv)
     if output_path.exists():
-        logger.info(f"[TIPI] File already exists: {output_csv}")
+        logger.info(f"File already exists: {output_csv}")
         return
 
     try:
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        logger.info(f"[TIPI] Fetching TIPI data from: {url}")
-        
+        logger.info(f"Fetching TIPI data from: {url}")
         resp = requests.get(url, timeout=60)
         resp.raise_for_status()
-        logger.info("[TIPI] Successfully downloaded TIPI XLSX")
+        logger.info("Successfully downloaded TIPI XLSX")
 
         df = pd.read_excel(io.BytesIO(resp.content), sheet_name=sheet_name, skiprows=7, engine="openpyxl")
+
         df.columns = [str(c).strip().lower() for c in df.columns]
 
         col_ncm = next((c for c in df.columns if "ncm" in c), None)
         if not col_ncm:
-            raise ValueError(f"[TIPI] Not found column: {df.columns}")
+            raise ValueError(f"Not found column: {df.columns}")
         
         df_filtered = df[df[col_ncm].astype(str).str.startswith(filter_number)]
 
         df_filtered.to_csv(output_csv, index=False, encoding="utf-8")
-        logger.info(f"[TIPI] Generated {output_csv} with {len(df_filtered)} records filtered by chapter {filter_number}")
+        logger.info(f"Generated {output_csv} with {len(df_filtered)} records filtered by chapter {filter_number}")
 
     except requests.exceptions.RequestException as e:
-        logger.error(f"[TIPI] Error requesting TIPI XLSX: {e}")
+        logger.error(f"Error requesting TIPI XLSX: {e}")
         raise
     except Exception as e:
-        logger.error(f"[TIPI] Unexpected error: {e}")
+        logger.error(f"Unexpected error: {e}")
         raise
 
 

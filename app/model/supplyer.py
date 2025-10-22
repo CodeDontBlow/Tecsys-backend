@@ -1,9 +1,10 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import String, Integer
+
 from app.model.base import Base
 
 
-class Supplier(Base):
+class Supplyer(Base):
     """Model for suppliers table."""
     __tablename__ = "suppliers"
 
@@ -11,7 +12,4 @@ class Supplier(Base):
     part_number: Mapped[str] = mapped_column(String(20), nullable=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
 
-    supplier_product = relationship("SupplierProduct", back_populates="supplier")
-
-    # supplyer_products: Mapped[list["SupplyerProduct"]] = relationship("SupplyerProduct")
-    # supplyer_products: Mapped[list["SupplyerProduct"]] = relationship("SupplyerProduct", back_populates="suppliers")
+    supplyer_products: Mapped[list["SupplyerProduct"]] = relationship("SupplyerProduct", back_populates="suppliers")
