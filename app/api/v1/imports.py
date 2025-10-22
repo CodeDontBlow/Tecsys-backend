@@ -12,7 +12,7 @@ from sqlalchemy.orm import joinedload
 
 router = APIRouter(prefix="/imports")
 
-@router.get("/all-last", response_model=List[ImportResponse],status_code=status.HTTP_200_OK)
+@router.get("/all-results", response_model=List[ImportResponse],status_code=status.HTTP_200_OK)
 async def list_all(db: AsyncSession = Depends(get_session)):
     subq = select(func.max(Order.order_date)).scalar_subquery()
     logger.info("[IMPORTS] GET /imports")
