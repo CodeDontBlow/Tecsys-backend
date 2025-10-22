@@ -4,6 +4,7 @@ from typing import Annotated
 
 class ManufacturerBase(BaseModel):
     """Base schema for manufacturer information"""
+
     name: Annotated[
         str,
         Field(
@@ -38,7 +39,11 @@ class ManufacturerBase(BaseModel):
     }
 
 
-class ManufacturerUpdate(BaseModel):
+class ManufacturerCreate(ManufacturerBase):
+    pass
+
+
+class ManufacturerUpdate(ManufacturerBase):
     name: Annotated[
         str | None,
         Field(
@@ -66,11 +71,9 @@ class ManufacturerUpdate(BaseModel):
         ),
     ]
 
-    model_config = {
-        "extra": "forbid",
-        "str_strip_whitespace": True,
-    }
-    
+    model_config = ManufacturerBase.model_config
+
+
 class ManufacturerResponse(BaseModel):
     id: int
     name: str

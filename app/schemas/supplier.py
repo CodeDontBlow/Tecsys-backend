@@ -1,6 +1,8 @@
 from typing import Annotated
 from pydantic import BaseModel, Field
 
+from app.schemas.product import ProductBase
+
 
 class BaseSupplier(BaseModel):
     """Base schema for supplier information"""
@@ -19,6 +21,7 @@ class BaseSupplier(BaseModel):
             title="Part Number",
             description="Part number of the supplier",
             examples=["12345-XYZ"],
+            max_length=30
         ),
     ]
 
@@ -29,7 +32,11 @@ class BaseSupplier(BaseModel):
     }
 
 
-class SupplierUpdate(BaseModel):
+class SupplierCreate(BaseSupplier):
+    model_config = BaseSupplier.model_config
+
+
+class SupplierUpdate(BaseSupplier):
     name: Annotated[
         str | None,
         Field(
@@ -48,10 +55,8 @@ class SupplierUpdate(BaseModel):
         ),
     ]
 
-    model_config = {
-        "extra": "forbid",
-        "str_strip_whitespace": True,
-    }
+    model_config = ProductBase.model_config
+
 
 class SupplierResponse(BaseModel):
     id: int

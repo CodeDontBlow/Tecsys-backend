@@ -8,14 +8,6 @@ from app.schemas.product import ProductBase, ProductResponse
 class SupplierProductBase(BaseModel):
     """Base schema for supplier-product relationship"""
 
-    id: Annotated[
-        int,
-        Field(
-            title="ID",
-            description="Unique identifier for the supplier-product relationship",
-            examples=[1],
-        ),
-    ]
     supplier_id: Annotated[
         int,
         Field(
@@ -27,24 +19,18 @@ class SupplierProductBase(BaseModel):
     product_id: Annotated[
         int,
         Field(
-            title="Product id", description="Primary key id of the product", examples=[1]
+            title="Product id",
+            description="Primary key id of the product",
+            examples=[1],
         ),
     ]
-    product_ncm: Annotated[
+    erp_description: Annotated[
         str,
         Field(
-            title="Product NCM code",
-            description="NCM code of the product",
-            examples=["87032100"],
-        ),
-    ]
-    product: Annotated[
-        ProductBase,
-        Field(
-            title="Product Final description",
-            description="Final description of the product by LLM Model",
-            examples=["Some product description"],
-        ),
+            title="erp_descriptions",
+            description="A relationship descriptions between Supplier and Product",
+            examples=[1],
+        )
     ]
 
     model_config = {
@@ -54,15 +40,32 @@ class SupplierProductBase(BaseModel):
     }
 
 
+class SupplierProductCreate(SupplierProductBase):
+    model_config = SupplierProductBase.model_config
+
+
 class SupplierProductUpdate(BaseModel):
-    erp_description: str
+    erp_description: Annotated[
+        str | None,
+        Field(
+            title="erp_descriptions",
+            description="A relationship descriptions between Supplier and Product",
+            examples=[1],
+        )
+    ]
+
+    model_config = {
+        "extra": "forbid",
+        "str_strip_whitespace": True,
+        "from_attributes": True,
+    }
+
 
 class SupplierProductResponse(BaseModel):
     id: int
     erp_description: str
     supplier: SupplierResponse
     product: ProductResponse
-
 
     #   id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     # supplier_id: Mapped[int] = mapped_column(
