@@ -16,27 +16,6 @@ class ImportBase(BaseModel):
         ),
     ]
 
-    order_id: Annotated[
-        int,
-        Field(
-            title="Order ID",
-            description="Unique identifier for the order associated with the import",
-            examples=[1],
-        ),
-    ]
-    manufacturer: Annotated[
-        ManufacturerBase,
-        Field(
-            title="Manufacturer Information",
-            description="Details of the manufacturer",
-            examples=[{
-                "name": "Manufacturer ABC",
-                "origin_country": "Country XYZ",
-                "address": "1234 Industrial Rd, City, Country",
-            }],
-        ),
-    ]
-
     model_config = {
         "extra": "forbid",
         "str_strip_whitespace": True,
@@ -44,7 +23,36 @@ class ImportBase(BaseModel):
     }
 
 
-class ImportUpdate(BaseModel):
+class ImportCreate(ImportBase):
+    order_id: Annotated[
+        int,
+        Field(
+            title="Order ID",
+            description="ID of the order associated with the import",
+            examples=[1],
+        ),
+    ]
+
+    manufacturer_id: Annotated[
+        int,
+        Field(
+            title="Manufacter ID",
+            description="ID of the Manufacter associated with the product and import",
+            examples=[1],
+        ),
+    ]
+
+    supplier_product_id: Annotated[
+        int,
+        Field(
+            title="Order ID",
+            description="ID of the supplier and product relationship associated with the import",
+            examples=[1],
+        ),
+    ]
+
+
+class ImportUpdate(ImportBase):
     product_part_number: Annotated[
         str | None,
         Field(
@@ -54,10 +62,8 @@ class ImportUpdate(BaseModel):
         ),
     ]
 
-    model_config = {
-        "extra": "forbid",
-        "str_strip_whitespace": True,
-    }
+    model_config = BaseModel.model_config
+
 
 class ImportResponse(BaseModel):
     id: int

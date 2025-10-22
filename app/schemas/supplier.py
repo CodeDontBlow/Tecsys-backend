@@ -19,6 +19,8 @@ class BaseSupplier(BaseModel):
             title="Part Number",
             description="Part number of the supplier",
             examples=["12345-XYZ"],
+            max_length=30,
+            min_length=1,
         ),
     ]
 
@@ -29,7 +31,11 @@ class BaseSupplier(BaseModel):
     }
 
 
-class SupplierUpdate(BaseModel):
+class SupplierCreate(BaseSupplier):
+    model_config = BaseSupplier.model_config
+
+
+class SupplierUpdate(BaseSupplier):
     name: Annotated[
         str | None,
         Field(
@@ -48,10 +54,8 @@ class SupplierUpdate(BaseModel):
         ),
     ]
 
-    model_config = {
-        "extra": "forbid",
-        "str_strip_whitespace": True,
-    }
+    model_config = BaseSupplier.model_config
+
 
 class SupplierResponse(BaseModel):
     id: int

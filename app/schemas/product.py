@@ -1,12 +1,9 @@
 from pydantic import BaseModel, Field
 from typing import Annotated
 
+
 class ProductBase(BaseModel):
     """Base schema for product information"""
-
-    id: Annotated[
-        int, Field(title="Product id", description="ID product primary key", examples=[1])
-    ]
 
     ncm: Annotated[
         str,
@@ -33,7 +30,11 @@ class ProductBase(BaseModel):
     }
 
 
-class ProductUpdate(BaseModel):
+class ProductCreate(ProductBase):
+    pass
+
+
+class ProductUpdate(ProductBase):
     ncm: Annotated[
         str | None,
         Field(
@@ -52,7 +53,9 @@ class ProductUpdate(BaseModel):
         ),
     ]
 
+    model_config = ProductBase.model_config
+
 
 class ProductResponse(BaseModel):
     id: int
-    description_di: str = Field(alias="final_description")     
+    description_di: str = Field(alias="final_description")
