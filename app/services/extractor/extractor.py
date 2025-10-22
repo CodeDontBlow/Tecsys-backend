@@ -1,5 +1,41 @@
-from bs4 import BeautifulSoup
+import json
 import re
+from bs4 import BeautifulSoup
+from app.log.logger import logger
+
+
+
+def clean_description(raw_description):
+    """
+    clean the description to ia process later
+    """
+    if '|' in raw_description:
+        cleaned = raw_description.split('|')[0].strip()
+    else:
+        cleaned = raw_description
+    
+    patterns_to_remove = [
+        r'RoHS:.*',
+        r'RoHS Compliant:.*',
+        r'Min Qty:.*',
+        r'Package Multiple:.*', 
+        r'Date Code:.*',
+        r'Container:.*',
+        r'Part Details.*',
+        r'\bYes$',
+        r'\bNo$'
+    ]
+    
+    for pattern in patterns_to_remove:
+        cleaned = re.sub(pattern, '', cleaned)
+    
+    cleaned = ' '.join(cleaned.split())
+    cleaned = cleaned.rstrip(' ,|')
+    
+    return cleaned if cleaned else "N/A"
+
+
+
 
 def extract_from_html(html, targed_supplier):
 
@@ -47,7 +83,7 @@ def extract_from_html(html, targed_supplier):
     else:
         manufacturer = description = "N/A"
 
-    return {
+    data = {
         "supplier": found_supplier or targed_supplier,
         "product_part_number": product_part_number,
         "part_number_supplier": disti_number or "N/A",
@@ -55,36 +91,6 @@ def extract_from_html(html, targed_supplier):
         "description": description
     }
 
-def clean_description(raw_description):
-    """
-    clean the description to ia process later
-    """
-    if '|' in raw_description:
-        cleaned = raw_description.split('|')[0].strip()
-    else:
-        cleaned = raw_description
-    
-    patterns_to_remove = [
-        r'Min Qty:.*',
-        r'Package Multiple:.*', 
-        r'Date Code:.*',
-        r'Container:.*',
-        r'Part Details.*',
-        r'\bYes$',
-        r'\bNo$'
-    ]
-    
-    for pattern in patterns_to_remove:
-        cleaned = re.sub(pattern, '', cleaned)
-    
-    cleaned = ' '.join(cleaned.split())
-    cleaned = cleaned.rstrip(' ,|')
-    
-    return cleaned if cleaned else "N/A"
+    logger.info(f"[WEBSCRAPING-EXTRACT] Successfully extracted from {data['product_part_number']}.")
 
-if __name__ == "__main__":
-    html = ''
-    supplier = "Avnet" 
-    result = extract_from_html(html, supplier)
-    print(result)
-
+    return json.dumps(data,indent=4, ensure_ascii=False)
