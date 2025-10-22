@@ -3,7 +3,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, asc
 from app.db.database import get_session
 from app.model.manufacturer import Manufacturer
-from app.schemas.manufacturer import ManufacturerUpdate
+from app.repositories.manufacturer_repository import ManufacturerRepository
+from app.schemas.manufacturer import ManufacturerCreate, ManufacturerUpdate
 from app.log.logger import logger
 
 router = APIRouter(prefix="/manufacturer")
@@ -22,6 +23,17 @@ async def list_all(db: AsyncSession = Depends(get_session)):
         return items
     except Exception as e:
         logger.error(f"[MANUFACTURER] Error in GET /manufacturer: {e}")
+        raise
+
+
+@router.post("/save", response_model=ManufacturerCreate, status_code=status.HTTP_200_OK)
+async def save(manufacturer_create: ManufacturerCreate, db: AsyncSession = Depends(get_session)):
+    try:
+        pro_repo = ManufacturerRepository(db, Manufacturer)
+        new_manufacturer = await pro_repo.save(manufacturer_create)
+        return new_manufacturer
+    except Exception as e:
+        logger.error(f"[MANUFACTURER] Error in post /manufacturer: {e}")
         raise
 
 

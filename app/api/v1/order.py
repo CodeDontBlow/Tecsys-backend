@@ -3,7 +3,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, asc
 from app.db.database import get_session
 from app.model.order import Order
-from app.schemas.order import OrderUpdate
+from app.repositories.order_repository import OrderRepository
+from app.schemas.order import OrderCreate, OrderUpdate
 from app.log.logger import logger  
 
 router = APIRouter(prefix="/order")
@@ -23,6 +24,17 @@ async def list_all(db: AsyncSession = Depends(get_session)):
     except Exception as e:
         logger.error(f"[ORDER] Error in GET /order: {e}")
         raise
+
+@router.post("/save", response_model=OrderCreate, status_code=status.HTTP_200_OK)
+async def save(order_create: OrderCreate, db: AsyncSession = Depends(get_session)):
+    try:
+        pro_repo = OrderRepository(db, Order)
+        new_order = await pro_repo.save(order_create)
+        return new_order
+    except Exception as e:
+        logger.error(f"[ORDER] Error in post /order: {e}")
+        raise
+
 
 
 @router.put("/{id}", response_model=OrderUpdate, status_code=status.HTTP_200_OK)

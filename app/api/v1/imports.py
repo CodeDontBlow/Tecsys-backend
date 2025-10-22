@@ -6,27 +6,35 @@ from app.db.database import get_session
 from app.model.imports import Imports
 from app.model.supplier_product import SupplierProduct
 from app.model.order import Order
-from app.schemas.imports import ImportResponse, ImportUpdate
+from app.repositories.imports_repository import ImportsRepository
+from app.schemas.imports import ImportCreate, ImportResponse, ImportUpdate
 from app.log.logger import logger
 from sqlalchemy.orm import joinedload
 
 router = APIRouter(prefix="/imports")
 
-@router.get("/all-results", response_model=List[ImportResponse],status_code=status.HTTP_200_OK)
+
+@router.get(
+    "/all-results", response_model=List[ImportResponse], status_code=status.HTTP_200_OK
+)
 async def list_all(db: AsyncSession = Depends(get_session)):
     subq = select(func.max(Order.order_date)).scalar_subquery()
     logger.info("[IMPORTS] GET /imports")
-    try:        
+    try:
         stmt = (
-        select(Imports)
-        .join(Imports.order)  
-        .options(
-            joinedload(Imports.manufacturer),
-            joinedload(Imports.supplier_product).joinedload(SupplierProduct.supplier),
-            joinedload(Imports.supplier_product).joinedload(SupplierProduct.product),
-            joinedload(Imports.order),
-        )
-         .where(Order.order_date == subq) 
+            select(Imports)
+            .join(Imports.order)
+            .options(
+                joinedload(Imports.manufacturer),
+                joinedload(Imports.supplier_product).joinedload(
+                    SupplierProduct.supplier
+                ),
+                joinedload(Imports.supplier_product).joinedload(
+                    SupplierProduct.product
+                ),
+                joinedload(Imports.order),
+            )
+            .where(Order.order_date == subq)
         )
 
         result = await db.execute(stmt)
@@ -41,6 +49,18 @@ async def list_all(db: AsyncSession = Depends(get_session)):
         logger.error(f"[IMPORTS] Error in GET /imports: {e}")
         raise
 
+
+@router.post("/save", response_model=ImportCreate, status_code=status.HTTP_200_OK)
+async def save(import_create: ImportCreate, db: AsyncSession = Depends(get_session)):
+    try:
+        pro_repo = ImportsRepository(db, Imports)
+        new_import = await pro_repo.save(import_create)
+        return new_import
+    except Exception as e:
+        logger.error(f"[SUPPLIER_PRODUCT] Error in post /supplierproduct: {e}")
+        raise
+
+
 @router.get("/", status_code=status.HTTP_200_OK)
 async def get_all_normal(db: AsyncSession = Depends(get_session)):
     logger.info("[IMPORTS] GET /imports (ALL NORMAL - no joins)")
@@ -51,7 +71,9 @@ async def get_all_normal(db: AsyncSession = Depends(get_session)):
         items = result.scalars().all()
 
         if not items:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No imports found.")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="No imports found."
+            )
 
         return items
 
@@ -61,7 +83,9 @@ async def get_all_normal(db: AsyncSession = Depends(get_session)):
 
 
 @router.put("/{id}", response_model=ImportUpdate, status_code=status.HTTP_200_OK)
-async def replace(id: int, import_update: ImportUpdate, db: AsyncSession = Depends(get_session)):
+async def replace(
+    id: int, import_update: ImportUpdate, db: AsyncSession = Depends(get_session)
+):
     logger.info(f"[IMPORTS] PUT /imports/{id}")
     try:
         result = await db.execute(select(Imports).where(Imports.id == id))

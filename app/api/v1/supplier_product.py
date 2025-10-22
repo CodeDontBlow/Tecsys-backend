@@ -3,7 +3,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, asc
 from app.db.database import get_session
 from app.model.supplier_product import SupplierProduct
-from app.schemas.supplier_product import SupplierProductUpdate
+from app.repositories.supplier_product_repository import SupplierProductRepository
+from app.schemas.supplier_product import SupplierProductCreate, SupplierProductUpdate
 from app.log.logger import logger  
 
 router = APIRouter(prefix="/supplierproduct")
@@ -24,6 +25,15 @@ async def list_all(db: AsyncSession = Depends(get_session)):
         logger.error(f"[SUPPLIERPRODUCT] Error in GET /supplierproduct: {e}")
         raise
 
+@router.post("/save", response_model=SupplierProductCreate, status_code=status.HTTP_200_OK)
+async def save(supplier_product_create: SupplierProductCreate, db: AsyncSession = Depends(get_session)):
+    try:
+        pro_repo = SupplierProductRepository(db, SupplierProduct)
+        new_supplier_product = await pro_repo.save(supplier_product_create)
+        return new_supplier_product
+    except Exception as e:
+        logger.error(f"[SUPPLIER_PRODUCT] Error in post /supplierproduct: {e}")
+        raise
 
 @router.put("/{id}", response_model=SupplierProductUpdate, status_code=status.HTTP_200_OK)
 async def replace(id: int, supplier_product_update: SupplierProductUpdate, db: AsyncSession = Depends(get_session)):

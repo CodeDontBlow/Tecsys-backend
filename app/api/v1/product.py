@@ -3,7 +3,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, asc
 from app.db.database import get_session
 from app.model.product import Product
-from app.schemas.product import ProductUpdate
+from app.repositories.product_repository import ProductRepository
+from app.schemas.product import ProductCreate, ProductUpdate
 from app.log.logger import logger  
 
 router = APIRouter(prefix="/product")
@@ -22,6 +23,17 @@ async def list_all(db: AsyncSession = Depends(get_session)):
         return items
     except Exception as e:
         logger.error(f"[PRODUCT] Error in GET /product: {e}")
+        raise
+
+
+@router.post("/save", response_model=ProductCreate, status_code=status.HTTP_200_OK)
+async def save(product_create: ProductCreate, db: AsyncSession = Depends(get_session)):
+    try:
+        pro_repo = ProductRepository(db, Product)
+        new_product = await pro_repo.save(product_create)
+        return new_product
+    except Exception as e:
+        logger.error(f"[PRODUCT] Error in post /product: {e}")
         raise
 
 
