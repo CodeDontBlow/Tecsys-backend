@@ -26,11 +26,11 @@ class Extract_json:
         
         result = {}
         for i, product in enumerate(data["products"], 1):
-            result[f"mercadoria_{i:02d}"] = {
-                "numero": product["mercadoria"],
-                "nome": product["nome"],
+            result[f"product_{i:02d}"] = {
+                "number": product["product"],
+                "name": product["name"],
                 "part_number": product["part_number"],
-                "codigo_erp": product["codigo_erp"]
+                "erp_code": product["erp_code"]
             }
         
         return json.dumps(result, ensure_ascii=False, indent=2)
