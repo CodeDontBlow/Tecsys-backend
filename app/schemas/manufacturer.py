@@ -38,11 +38,7 @@ class ManufacturerBase(BaseModel):
     }
 
 
-class ManufacturerCreate(ManufacturerBase):
-    pass
-
-
-class ManufacturerUpdate(ManufacturerBase):
+class ManufacturerUpdate(BaseModel):
     name: Annotated[
         str | None,
         Field(
@@ -70,4 +66,13 @@ class ManufacturerUpdate(ManufacturerBase):
         ),
     ]
 
-    model_config = ManufacturerBase.model_config
+    model_config = {
+        "extra": "forbid",
+        "str_strip_whitespace": True,
+    }
+    
+class ManufacturerResponse(BaseModel):
+    id: int
+    name: str
+    address: str
+    origin_country: str

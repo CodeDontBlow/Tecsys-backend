@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 class BaseSupplier(BaseModel):
     """Base schema for supplier information"""
     name: Annotated[
-        str | None,
+        str,
         Field(
             title="Supplier Name",
             description="Name of the supplier",
@@ -14,13 +14,11 @@ class BaseSupplier(BaseModel):
     ]
 
     part_number: Annotated[
-        str | None,
+        str,
         Field(
             title="Part Number",
             description="Part number of the supplier",
             examples=["12345-XYZ"],
-            max_length=30,
-            min_length=1,
         ),
     ]
 
@@ -31,9 +29,9 @@ class BaseSupplier(BaseModel):
     }
 
 
-class SupplierCreate(BaseSupplier):
+class SupplierUpdate(BaseModel):
     name: Annotated[
-        str,
+        str | None,
         Field(
             title="Supplier Name",
             description="Name of the supplier",
@@ -42,18 +40,20 @@ class SupplierCreate(BaseSupplier):
     ]
 
     part_number: Annotated[
-        str,
+        str | None,
         Field(
             title="Part Number",
             description="Part number of the supplier",
             examples=["12345-XYZ"],
-            max_length=30,
-            min_length=1,
         ),
     ]
 
-    model_config = BaseSupplier.model_config
+    model_config = {
+        "extra": "forbid",
+        "str_strip_whitespace": True,
+    }
 
-
-class SupplierUpdate(BaseSupplier):
-    pass
+class SupplierResponse(BaseModel):
+    id: int
+    name: str
+    part_number: str

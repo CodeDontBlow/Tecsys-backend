@@ -1,6 +1,6 @@
 from typing import Annotated
 from pydantic import BaseModel, Field
-from datetime import datetime
+from datetime import datetime, date
 
 
 class OrderBase(BaseModel):
@@ -21,13 +21,7 @@ class OrderBase(BaseModel):
     }
 
 
-class OrderCreate(OrderBase):
-    """Schemas for order create operations"""
-    pass
-
-
-class OrderUpdate(OrderBase):
-    """Schemas for order update operations"""
+class OrderUpdate(BaseModel):
     order_date: Annotated[
         datetime | None,
         Field(
@@ -37,4 +31,11 @@ class OrderUpdate(OrderBase):
         ),
     ]
 
-    model_config = OrderBase.model_config
+    model_config = {
+        "extra": "forbid",
+        "str_strip_whitespace": True,
+    }
+
+class OrderResponse(BaseModel):
+    id: int
+    order_date: date
