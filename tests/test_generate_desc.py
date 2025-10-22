@@ -8,7 +8,7 @@ async def generate_desc():
     pdf_processado1.process_enter()
 
     erp_descs = pdf_processado1.get_erp_desc()
-    supplyer_desc = ' test '
+    supplier_desc = ' test '
 
     test = ['02','03','04','05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15']
     for key in test:
@@ -18,7 +18,7 @@ async def generate_desc():
 
     """)
 
-    resultados_paralelo = await Generate_final_desc.generate_final_desc_async(erp_descs, supplyer_desc)
+    resultados_paralelo = await Generate_final_desc.generate_final_desc_async(erp_descs, supplier_desc)
     
    
     return resultados_paralelo
