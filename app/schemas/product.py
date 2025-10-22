@@ -1,27 +1,28 @@
 from pydantic import BaseModel, Field
 from typing import Annotated
 
-
 class ProductBase(BaseModel):
     """Base schema for product information"""
 
+    id: Annotated[
+        int, Field(title="Product id", description="ID product primary key", examples=[1])
+    ]
+
     ncm: Annotated[
-        str | None,
+        str,
         Field(
             title="Product NCM code",
             description="NCM code of the product",
             examples=["87032100"],
-            max_length=10,
-            min_length=6,
         ),
     ]
 
     final_description: Annotated[
-        str | None,
+        str,
         Field(
             title="Product Final descriptrion",
             description="Final description of the product by Embedding Model",
-            examples=[""],
+            # examples=[""],
         ),
     ]
 
@@ -32,9 +33,26 @@ class ProductBase(BaseModel):
     }
 
 
-class ProductCreate(ProductBase):
-    pass
+class ProductUpdate(BaseModel):
+    ncm: Annotated[
+        str | None,
+        Field(
+            title="Product NCM code",
+            description="NCM code of the product",
+            examples=["87032100"],
+        ),
+    ]
+
+    final_description: Annotated[
+        str | None,
+        Field(
+            title="Product Final descriptrion",
+            description="Final description of the product by Embedding Model",
+            # examples="",
+        ),
+    ]
 
 
-class ProductUpdate(ProductBase):
-    pass
+class ProductResponse(BaseModel):
+    id: int
+    description_di: str = Field(alias="final_description")     
