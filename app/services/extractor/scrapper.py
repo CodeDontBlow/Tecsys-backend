@@ -1,9 +1,9 @@
 import time
-import os
 import requests
+from app.log.logger import logger
 from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout #type: ignore
 
-# Cabeçalhos para simular uma requisição de navegador e evitar bloqueios (sem isso, nem todas as informações do site são extraídas).
+# Headers to simulate a browser request and avoid blocking (without this, not all information from the site is extracted).
 HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
 "AppleWebKit/537.36 (KHTML, like Gecko) "
 "Chrome/120.0.0.0 Safari/537.36",
@@ -11,23 +11,13 @@ HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
 DEFAULT_SLEEP_BETWEEN_REQUESTS = 1.0
 REQUESTS_TIMEOUT = 20
 
-OUTPUT_DIR = os.path.join("app", "services", "extractor" ,"web-scraping", "scraper_results", f"scrape_{time.strftime('%Y-%m-%d_%H-%M-%S')}")
-
-def ensure_dir(outdir):
-    os.makedirs(outdir, exist_ok=True)
-    return outdir
-
-def save_text(content, path):
-    with open(path, "w", encoding="utf-8") as f:
-        f.write(content)
-
 def get_raw_html_from_url(url):
     try:
         r = requests.get(url, headers=HEADERS, timeout=REQUESTS_TIMEOUT)
         r.raise_for_status()
         return r.text
     except requests.exceptions.RequestException as e:
-        print(f"Erro ao obter o HTML da URL {url}: {e}")
+        print(f"Error when try get the html to {url}: {e}")
         return None
 
 def get_rendered_html_from_url(url):
@@ -49,12 +39,10 @@ def get_rendered_html_from_url(url):
 
             return rendered
         except PWTimeout:
-            print(f"Erro: O carregamento da página {url} demorou demais.")
+            print(f"Error: the page {url} took a long time to renderize .")
             return None
 
-def save_combined_html(raw_html, rendered_html, outdir, pn):
-    combined_html_path = os.path.join(outdir, f"{pn}.html")
-    
+def get_combined_html(raw_html, rendered_html):
     combined_html_content = f"""
     <html>
     <body>
@@ -63,42 +51,43 @@ def save_combined_html(raw_html, rendered_html, outdir, pn):
     </body>
     </html>
     """
+    return combined_html_content
 
-    save_text(combined_html_content, combined_html_path)
-    print(f"Arquivo HTML do PN {pn} salvo em {combined_html_path}.")
-
-def process_pn(pn, outdir, sleep_between=DEFAULT_SLEEP_BETWEEN_REQUESTS):
+def process_pn(pn, sleep_between=DEFAULT_SLEEP_BETWEEN_REQUESTS):
     url = f"https://www.findchips.com/search/{pn}"
-    print(f"\nIniciando o processamento do PN: {pn}...")
+    print(f"\Start the process PN: {pn}...")
 
     raw_html = get_raw_html_from_url(url)
     if not raw_html:
-        print(f"Erro ao obter o HTML para o PN {pn}. Pulando...")
-        return
+        print(f"Error to get html from {pn}. Skipping...")
+        return None
 
     time.sleep(sleep_between)
 
     rendered_html = get_rendered_html_from_url(url)
     if not rendered_html:
-        print(f"Erro ao obter o HTML renderizado para o PN {pn}. Pulando...")
-        return
+        print(f"Error to get rederized html to PN {pn}. Skipping...")
+        return None
 
     time.sleep(sleep_between)
 
-    save_combined_html(raw_html, rendered_html, outdir, pn)
+    combined_html = get_combined_html(raw_html, rendered_html)
+    return combined_html
 
 def main():
     pns = ["NACE100M100V6.3X8TR13F", "1N4148W-TP"]
-    
-    if not pns:
-        print("Nenhum PN encontrado na lista.")
-        return
 
-    outdir = ensure_dir(OUTPUT_DIR)
-    print(f"Iniciando o processamento de {len(pns)} PNs. Os arquivos serão salvos em: {outdir}")
 
+    print(f"Starting process of {len(pns)} PNs.")
+
+    html_results = {}
     for pn in pns:
-        process_pn(pn, outdir, sleep_between=DEFAULT_SLEEP_BETWEEN_REQUESTS)
+        html_content = process_pn(pn, sleep_between=DEFAULT_SLEEP_BETWEEN_REQUESTS)
+        if html_content:
+            html_results[pn] = html_content
+
+    return html_results
 
 if __name__ == "__main__":
-    main()
+    results = main()
+    print(results.keys())
