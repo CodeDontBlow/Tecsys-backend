@@ -2,7 +2,7 @@ from app.db.chroma_db.manager import chroma_manager
 from app.db.chroma_db.model import Response
 from fastapi import HTTPException
 
-def get_ncm(query: str) -> dict:
+async def get_ncm(query: str) -> dict:
     if not query or not query.strip():
         raise ValueError("Query cannot be empty!")
     try:
@@ -24,3 +24,4 @@ def get_ncm(query: str) -> dict:
         }
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+    

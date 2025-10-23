@@ -26,9 +26,9 @@ def check_ollama():
             return True
         else:
             if EMBEDDING_MODEL not in available_models:
-                logger.warning(f"[OLLAMA] Embedding model '{EMBEDDING_MODEL}' not found. ❌")
+                logger.warning(f"[OLLAMA] Embedding model '{EMBEDDING_MODEL}' not found. ")
             if DESCRIPTUM_MODEL not in available_models:
-                logger.warning(f"[OLLAMA] Descritpum model '{DESCRIPTUM_MODEL}' not found. ❌")
+                logger.warning(f"[OLLAMA] Descritpum model '{DESCRIPTUM_MODEL}' not found.")
             return False
 
     except FileNotFoundError:

@@ -1,5 +1,5 @@
 import json
-from app.services.ncm_service import get_ncm
+from app.libs.ncm.setup import get_ncm
 
 descriptions_pt = [
     "Capacitor Eletrolítico de Alumínio, 10 µF, 100 V, ±20%, 2000 h @ 85°C, Radial SMD", # 8532.22.00
