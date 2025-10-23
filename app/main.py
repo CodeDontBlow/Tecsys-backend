@@ -1,8 +1,10 @@
+import asyncio
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
 from app.api.router_global import router
+from app.libs.websocket.worker import worker
 
 
 class App(FastAPI):
@@ -26,3 +28,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.include_router(router, prefix="/api")
+
+@app.on_event("startup")
+async def startup_event():
+    asyncio.create_task(worker())
