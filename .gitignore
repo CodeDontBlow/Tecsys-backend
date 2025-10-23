@@ -160,6 +160,7 @@ ipython_config.py
 .pdm-python
 .pdm-build/
 
+
 # pixi
 #   Similar to Pipfile.lock, it is generally recommended to include pixi.lock in version control.
 #pixi.lock
@@ -254,3 +255,11 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 .vscode
+
+
+.github/
+
+
+#Aqui serve para impedir que a pasta de resultados do webscraping vá para o repositório
+./app/services/extractor/web-scraping/
+/app/services/extractor/web-scraping/
