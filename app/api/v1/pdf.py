@@ -1,7 +1,7 @@
 import asyncio
 from fastapi import APIRouter, UploadFile, File
 from app.libs.websocket.manager import ws_manager
-from app.services.extract_service.enterPDF import EnterPDF
+from app.libs.extract_pdf.enterPDF import EnterPDF
 
 router = APIRouter(prefix="/pdf")
 

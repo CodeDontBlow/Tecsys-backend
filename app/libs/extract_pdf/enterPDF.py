@@ -1,7 +1,8 @@
 import json
-from app.services.extract_service.pdf2txt import pdf_to_text
-from app.services.extract_service.extract_json import Extract_json
-from app.services.extract_service.find_info import Find_info
+
+from .pdf2txt import pdf_to_text
+from .extract_json import Extract_json
+from .find_info import Find_info
 
 
 class EnterPDF:

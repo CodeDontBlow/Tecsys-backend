@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from app.services.ollama_service.generate_final_desc import Generate_final_desc
+from app.libs.final_description.generate_final_desc import Generate_final_desc
 from app.log.logger import logger
 from app.libs.websocket.manager import ws_manager
 from app.libs.websocket.worker import enqueue_task

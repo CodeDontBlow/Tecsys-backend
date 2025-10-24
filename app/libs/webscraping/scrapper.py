@@ -1,6 +1,5 @@
 import asyncio
 from typing import Iterable, Dict, Optional
-
 from aiohttp import ClientSession, ClientTimeout
 from playwright.async_api import async_playwright, TimeoutError as PWTimeout #type: ignore
 

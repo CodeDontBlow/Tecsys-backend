@@ -1,10 +1,9 @@
 import asyncio
 from playwright.async_api import async_playwright, TimeoutError as PWTimeout  # type: ignore
-
-
-from app.log.logger import logger
 from .extractor import extract_from_html
 from .scrapper import AsyncFindChipsScraper
+
+
 
 # TEST
 async def main():
