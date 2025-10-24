@@ -28,7 +28,7 @@ class AsyncFindChipsScraper:
         nav_timeout_ms: int = 60_000,
         networkidle_timeout_ms: int = 30_000,
         headless: bool = True,
-        max_concurrency: int = 15,
+        max_concurrency: int = 4,
     ) -> None:
         self.headers = dict(self.DEFAULT_HEADERS)
         if user_agent:

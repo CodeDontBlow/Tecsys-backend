@@ -37,8 +37,8 @@ def extract_from_html(html: str, target_supplier: str) -> str:
     """Extract structured data (JSON) from rendered Findchips HTML."""
     soup = BeautifulSoup(html, "html.parser")
 
-    # --- supplier name ---
-    suppliers = [h2.get_text(strip=True) for h2 in soup.find_all("h2")]
+    suppliers = [h2.get_text(strip=True) for h2 in soup.find_all("h2") if h2.get_text(strip=True)]
+
     valid_suppliers = [s for s in suppliers if "Most Popular" not in s]
 
     found_supplier = None
@@ -47,25 +47,22 @@ def extract_from_html(html: str, target_supplier: str) -> str:
             if target_supplier.lower() in s.lower():
                 found_supplier = s
                 break
-    if not found_supplier:
-        found_supplier = target_supplier or (valid_suppliers[0] if valid_suppliers else "Unknown")
 
-    # --- disti number ---
-    disti_number = "N/A"
-    for span in soup.find_all("span", class_=re.compile(r"additional-title"), string=re.compile(r"DISTI\s*#")):
-        parent = span.parent
-        if parent:
-            value_span = parent.find("span", class_=re.compile(r"additional-value"))
-            if value_span:
-                candidate = value_span.get_text(strip=True)
-                if re.fullmatch(r"[A-Za-z0-9\-_.]{2,30}", candidate):
-                    disti_number = candidate
-                    break
+    if not found_supplier and valid_suppliers:
+        found_supplier = valid_suppliers[0]
 
-    # --- main table ---
+    disti_number = ''
+    for el in soup.find_all(["div", "td", "span"]):
+        text = el.get_text()
+        if "DISTI #" in text:
+            match = re.search(r"DISTI #\s*([A-Za-z0-9\-_.]+)", text)
+            if match:
+                disti_number = match.group(1)
+                break
+
     table = soup.find("table")
     if not table:
-        return json.dumps({"error": "Main table not found"}, indent=4, ensure_ascii=False)
+        return "table not found."
 
     product_part_number = table.find("a")
     product_part_number = product_part_number.get_text(strip=True) if product_part_number else "N/A"
@@ -74,18 +71,22 @@ def extract_from_html(html: str, target_supplier: str) -> str:
     if len(rows) > 1:
         columns = rows[1].find_all("td")
         manufacturer = columns[1].get_text(strip=True) if len(columns) > 1 else "N/A"
+        
         raw_description = columns[2].get_text(strip=True) if len(columns) > 2 else "N/A"
+        
         description = clean_description(raw_description)
+        
     else:
         manufacturer = description = "N/A"
 
     data = {
-        "supplier": found_supplier or "Unknown",
+        "supplier": found_supplier or target_supplier,
         "product_part_number": product_part_number,
-        "part_number_supplier": disti_number,
+        "part_number_supplier": disti_number or "N/A",
         "manufacturer": manufacturer,
-        "description": description,
+        "description": description
     }
 
-    logger.info(f"[WEBSCRAPING-EXTRACT] Successfully extracted from {data['product_part_number']}")
-    return json.dumps(data, indent=4, ensure_ascii=False)
+    logger.info(f"[WEBSCRAPING-EXTRACT] Successfully extracted from {data['product_part_number']}.")
+
+    return json.dumps(data,indent=4, ensure_ascii=False)

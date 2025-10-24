@@ -14,7 +14,6 @@ async def main():
         "GRM1885C1H180JA01D",
         "CL10A106KP8NNNC",
         "C1608X5R1E106M080AC",
-        "88512006119",
         "NACE100M100V6.3X8TR13F",
         "CRCW060320K0FKEA",
     ]
