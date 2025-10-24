@@ -55,11 +55,10 @@ def extract_from_html(html: str, target_supplier: str) -> str:
     for el in soup.find_all(["div", "td", "span"]):
         text = el.get_text()
         if "DISTI #" in text:
-            match = re.search(r"DISTI #\s*([A-Za-z0-9\-_.]+)", text)
+            match = re.search(r"DISTI #\s*([A-Za-z0-9\-_.:]+)", text)
             if match:
                 disti_number = match.group(1)
                 break
-
     table = soup.find("table")
     if not table:
         return "table not found."
