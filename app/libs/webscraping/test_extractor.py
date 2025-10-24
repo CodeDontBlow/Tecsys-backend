@@ -8,12 +8,12 @@ from .scrapper import AsyncFindChipsScraper
 # TEST
 async def main():
     pns = [
-        "CL10C330JB8NNNC",
+        "CL10C330JB8NNNC", #
         "CL10B472KB8NNNC",
-        "GRM1885C1H180JA01D",
-        "CL10A106KP8NNNC",
-        "C1608X5R1E106M080AC",
-        "NACE100M100V6.3X8TR13F",
+        "GRM1885C1H180JA01D", #
+        "CL10A106KP8NNNC", #
+        "C1608X5R1E106M080AC", #
+        "NACE100M100V6.3X8TR13F", #
         "CRCW060320K0FKEA",
     ]
     target_supplier = "Avnet"
