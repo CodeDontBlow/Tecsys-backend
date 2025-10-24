@@ -1,7 +1,10 @@
 import asyncio
 from datetime import datetime
+import traceback
 from sqlalchemy.ext.asyncio import AsyncSession
+from app.libs.final_description.generate_final_desc import Generate_final_desc
 from app.libs.ncm import setup
+from app.libs.webscraping.exc_extractor import webscraping
 from app.libs.websocket.manager import ws_manager
 from app.model.imports import Imports
 from app.model.order import Order
@@ -18,8 +21,8 @@ from app.schemas.order import OrderCreate
 from app.schemas.product import ProductCreate
 from app.schemas.supplier import SupplierCreate
 from app.schemas.supplier_product import SupplierProductCreate
-from app.services.extract_service.enterPDF import EnterPDF
-from app.services.extract_service.extract_json import Extract_json
+from app.libs.extract_pdf.enterPDF import EnterPDF
+from app.libs.extract_pdf.extract_json import Extract_json
 
 # from app.services.ollama_service.generate_final_desc import Generate_final_desc
 
@@ -57,11 +60,30 @@ class PipelineManager:
         await self._notify("pdf_extraction", "success")
 
     async def _web_scrapping(self) -> None:
-        """Executes the web scrapping based on part numbers"""
-        await self._notify("web_scrapping", "in_progress")
-        part_numbers = [product["part_number"] for product in self._products]
-        print("webscraping executado")
-        await self._notify("web_scrapping", "success")
+        try:
+            await self._notify("web_scrapping", "in_progress")
+            part_numbers = [product["part_number"] for product in self._products]
+
+            results = await webscraping(part_numbers, self._supplier)
+
+            for content in results:
+                if not isinstance(content, dict):
+                    continue
+                product_part_number = content.get("product_part_number")
+                if not product_part_number:
+                    continue
+
+                for product in self._products:
+                    if product["part_number"] == product_part_number:
+                        product["manufacturer"] = content.get("manufacturer", "N/A")
+                        product["manufacturer_desc"] = content.get("description", "N/A")
+
+            await self._notify("web_scrapping", "success")
+        except Exception as e:
+            print(f"⚠️ Webscraping failed: {e}")
+            traceback.print_exc()
+            await self._notify("web_scrapping", "failed", error=str(e))
+            raise
 
     async def _get_ncm(self) -> None:
         """Executes get ncm based on descriptions"""
@@ -77,7 +99,17 @@ class PipelineManager:
         """Executes the final description generate"""
         await self._notify("product_description", "in_progress")
 
-        print("gerou descrição final")
+        count = 0
+
+        for product in self._products:
+            if count > 1:
+                break
+
+            final_description = Generate_final_desc.generate_final_desc(
+                product["name"], product["manufacturer_desc"]
+            )
+            print(final_description)
+
         await self._notify("product_description", "success")
 
     async def save_data(self) -> None:
@@ -97,7 +129,7 @@ class PipelineManager:
                 )
                 counter += 1
 
-                print("new_product", new_product)
+                # print("new_product", new_product)
 
                 new_supplier_product = await self._supplier_product_repo.save(
                     SupplierProductCreate(
@@ -127,8 +159,8 @@ class PipelineManager:
             await self._web_scrapping()
             await self._get_ncm()
             await self._get_final_description()
-            await self.save_data()
-            print(self._supplier)
+            # await self.save_data()
+            # print(self._products)
             await self._notify("process_overall", "finished")
         except Exception as e:
             await self._notify("pipeline_overall", "failed", e)

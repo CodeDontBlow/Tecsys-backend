@@ -41,8 +41,8 @@ async def create_order_product_manufacturer(
     manufacturer = await manufacturer_repo.save(
         ManufacturerCreate(
             name="Manufacturer ABC",
-            origin_country="Brazil",
-            address="1234 Industrial Rd, City, Country",
+            # origin_country="Brazil",
+            # address="1234 Industrial Rd, City, Country",
         )
     )
 

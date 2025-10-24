@@ -88,4 +88,5 @@ def extract_from_html(html: str, target_supplier: str) -> str:
 
     logger.info(f"[WEBSCRAPING-EXTRACT] Successfully extracted from {data['product_part_number']}.")
 
-    return json.dumps(data,indent=4, ensure_ascii=False)
+    # return json.dumps(data,indent=4, ensure_ascii=False)
+    return data

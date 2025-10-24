@@ -1,4 +1,5 @@
 import asyncio
+import sys
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -6,6 +7,8 @@ from app.core.config import settings
 from app.api.router_global import router
 from app.libs.websocket.worker import worker
 
+if sys.platform.startswith("win"):
+    asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
 
 class App(FastAPI):
     def __init__(self, *args, **kwargs) -> None:
