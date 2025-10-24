@@ -122,6 +122,40 @@ def pull_ollama_model_description():
         return None    
  
 
+def install_chromium():
+    try:
+        logger.info("[WEBSCRAPING] Install chromium browser to use in webscraping.")
+        
+        process = subprocess.Popen(
+            ['playwright', 'install', 'chromium'],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            universal_newlines=True,
+            encoding='utf-8',
+            bufsize=1,
+            errors='replace'
+        )
+
+        logger.info("[WEBSCRAPING] Downloading Chromium browser...")
+
+
+        process.wait()
+        
+        if process.returncode == 0:
+            logger.info("[WEBSCRAPING] Chromium installed successfully.")
+        else:
+            logger.error("[WEBSCRAPING] Failed to install Chromium.")
+
+    except subprocess.CalledProcessError as e:
+        logger.error(f"[WEBSCRAPING] Error during Chromium installation: {e}")
+        if e.stderr:
+            logger.error(f"[WEBSCRAPING] Installation stderr: {e.stderr}")
+    except FileNotFoundError:
+        logger.error("[WEBSCRAPING] Error: 'playwright' command not found. Make sure Playwright is installed.")
+    except Exception as e:
+        logger.error(f"[WEBSCRAPING] Unexpected error: {str(e)}")
+
+
 def config_system_tools():
     try:
         model_exists = check_ollama()
@@ -137,7 +171,11 @@ def config_system_tools():
 
         chroma_manager.populate_from_csv()
         logger.info("[CHROMADB] Collection populated successfully.")
+
+        install_chromium()
+        logger.info("[WEBSCRAPING] Chromium installation completed successfully.")
         
+
     except Exception as e:
         logger.error(f"[SYSTEM] Error during setup: {e}")
         logger.exception("[SYSTEM] Detailed error:")  
