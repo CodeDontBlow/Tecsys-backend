@@ -6,7 +6,7 @@ class ProductBase(BaseModel):
     """Base schema for product information"""
 
     ncm: Annotated[
-        str,
+        str | None,
         Field(
             title="Product NCM code",
             description="NCM code of the product",
@@ -35,15 +35,6 @@ class ProductCreate(ProductBase):
 
 
 class ProductUpdate(ProductBase):
-    ncm: Annotated[
-        str | None,
-        Field(
-            title="Product NCM code",
-            description="NCM code of the product",
-            examples=["87032100"],
-        ),
-    ]
-
     final_description: Annotated[
         str | None,
         Field(

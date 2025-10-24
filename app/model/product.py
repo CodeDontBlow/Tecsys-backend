@@ -9,7 +9,7 @@ class Product(Base):
     __tablename__ = "products"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    ncm: Mapped[str] = mapped_column(String(10), nullable=False)
+    ncm: Mapped[str] = mapped_column(String(10), nullable=True)
     final_description: Mapped[str] = mapped_column(String(300), nullable=False)
 
     supplier_product = relationship("SupplierProduct", back_populates="product")
