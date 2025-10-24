@@ -1,3 +1,5 @@
+modelfile_translator
+
 FROM qwen3:1.7b
 
 PARAMETER temperature 0.5

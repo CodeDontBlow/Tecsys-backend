@@ -1,5 +1,5 @@
 import json
-from app.services.extract_service.find_info import Find_info
+from .find_info import Find_info
 
 class Extract_json:
 
