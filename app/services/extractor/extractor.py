@@ -38,7 +38,7 @@ def extract_from_html(html: str, target_supplier: str) -> str:
     soup = BeautifulSoup(html, "html.parser")
 
     # --- supplier name ---
-    suppliers = [h3.get_text(strip=True) for h3 in soup.find_all("h3")]
+    suppliers = [h2.get_text(strip=True) for h2 in soup.find_all("h2")]
     valid_suppliers = [s for s in suppliers if "Most Popular" not in s]
 
     found_supplier = None
