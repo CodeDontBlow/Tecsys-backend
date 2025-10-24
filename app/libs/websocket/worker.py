@@ -1,4 +1,5 @@
 import asyncio
+import traceback
 
 task_queue = asyncio.Queue()
 
@@ -15,5 +16,7 @@ async def worker():
             await asyncio.sleep(1)
         except Exception as e:
             print(f"[Worker] Erro: {e}")
+            traceback.print_exc()
+            raise
         finally:
             task_queue.task_done()

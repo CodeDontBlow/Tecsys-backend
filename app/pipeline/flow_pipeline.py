@@ -97,20 +97,32 @@ class PipelineManager:
 
     async def _get_final_description(self) -> None:
         """Executes the final description generate"""
-        await self._notify("product_description", "in_progress")
+        try:
+            await self._notify("product_description", "in_progress")
 
-        count = 0
+            count = 0
 
-        for product in self._products:
-            if count > 1:
-                break
+            for product in self._products:
+                if count >= 1:
+                    break
 
-            final_description = Generate_final_desc.generate_final_desc(
-                product["name"], product["manufacturer_desc"]
-            )
-            print(final_description)
+                erp_desc = {"name": product.get("name", "")} 
+                manufacturer_desc = product.get("manufacturer_desc", "")
 
-        await self._notify("product_description", "success")
+                final_description = await Generate_final_desc.generate_final_desc_async(
+                    erp_desc, manufacturer_desc
+                )
+
+                product["final_description"] = final_description
+                count += 1
+
+            await self._notify("product_description", "success")
+
+        except Exception as e:
+            print(f"⚠️ LLM failed: {e}")
+            traceback.print_exc()
+            await self._notify("LLM", "failed", error=str(e))
+            raise
 
     async def save_data(self) -> None:
         try:
@@ -128,8 +140,6 @@ class PipelineManager:
                     ProductCreate(final_description="descrição " + str(counter))
                 )
                 counter += 1
-
-                # print("new_product", new_product)
 
                 new_supplier_product = await self._supplier_product_repo.save(
                     SupplierProductCreate(
@@ -160,7 +170,7 @@ class PipelineManager:
             await self._get_ncm()
             await self._get_final_description()
             # await self.save_data()
-            # print(self._products)
+            print(self._products)
             await self._notify("process_overall", "finished")
         except Exception as e:
             await self._notify("pipeline_overall", "failed", e)
