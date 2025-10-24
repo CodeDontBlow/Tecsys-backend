@@ -1,90 +1,133 @@
 import asyncio
-import aiohttp
-from app.log.logger import logger
+from typing import Iterable, Dict, Optional
+
+from aiohttp import ClientSession, ClientTimeout
 from playwright.async_api import async_playwright, TimeoutError as PWTimeout #type: ignore
 
-# Headers to simulate a browser request and avoid blocking (without this, not all information from the site is extracted).
-HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-"AppleWebKit/537.36 (KHTML, like Gecko) "
-"Chrome/120.0.0.0 Safari/537.36",
-"Accept-Language": "en-US,en;q=0.9"}
-DEFAULT_SLEEP_BETWEEN_REQUESTS = 1.0
-REQUESTS_TIMEOUT = 20
+from app.log.logger import logger
 
-async def async_get_raw_html_from_url(url, session):
-    try:
-        async with session.get(url, headers=HEADERS, timeout=REQUESTS_TIMEOUT) as response:
-            response.raise_for_status()
-            return await response.text()
-    except Exception as e:
-        logger.warning(f"[WEBSCRAPING] Error when try get the html to {url}: {e}")
-        return None
 
-async def async_get_rendered_html_from_url(url):
-    try:
-        async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=True, args=["--no-sandbox"])
-            context = await browser.new_context(user_agent=HEADERS["User-Agent"], locale="en-US")
-            page = await context.new_page()
+class AsyncFindChipsScraper:
+    """Asynchronous scraper for FindChips using Playwright (Chromium)"""
 
-            await page.goto(url, timeout=60_000)
-            await page.wait_for_load_state("networkidle", timeout=30_000)
+    DEFAULT_HEADERS = {
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/120.0.0.0 Safari/537.36"
+        ),
+        "Accept-Language": "en-US,en;q=0.9",
+    }
 
-            await asyncio.sleep(1.5)
+    def __init__(
+        self,
+        *,
+        user_agent: Optional[str] = None,
+        locale: str = "en-US",
+        sleep_between: float = 1.0,
+        nav_timeout_ms: int = 60_000,
+        networkidle_timeout_ms: int = 30_000,
+        headless: bool = True,
+        max_concurrency: int = 15,
+    ) -> None:
+        self.headers = dict(self.DEFAULT_HEADERS)
+        if user_agent:
+            self.headers["User-Agent"] = user_agent
 
-            rendered = await page.content()
+        self.locale = locale
+        self.sleep_between = sleep_between
+        self.nav_timeout_ms = nav_timeout_ms
+        self.networkidle_timeout_ms = networkidle_timeout_ms
+        self.headless = headless
+        self.max_concurrency = max_concurrency
+
+        # Lazy-initialized resources
+        self._session: Optional[ClientSession] = None
+        self._playwright = None
+        self._browser = None
+        self._context = None
+
+    async def __aenter__(self):
+        """Start browser and HTTP session"""
+        self._session = ClientSession(timeout=ClientTimeout(total=20))
+        self._playwright = await async_playwright().start()
+        self._browser = await self._playwright.chromium.launch(
+            headless=self.headless, args=["--no-sandbox"]
+        )
+        self._context = await self._browser.new_context(
+            user_agent=self.headers["User-Agent"], locale=self.locale
+        )
+        return self
+
+    async def __aexit__(self, exc_type, exc, tb):
+        """Gracefully close resources"""
+        try:
+            if self._context:
+                await self._context.close()
+            if self._browser:
+                await self._browser.close()
+            if self._playwright:
+                await self._playwright.stop()
+        finally:
+            if self._session and not self._session.closed:
+                await self._session.close()
+
+    async def _ensure_browser(self):
+        """Ensure browser context is available (for non-context use)"""
+        if not self._playwright:
+            self._playwright = await async_playwright().start()
+        if not self._browser:
+            self._browser = await self._playwright.chromium.launch(
+                headless=self.headless, args=["--no-sandbox"]
+            )
+        if not self._context:
+            self._context = await self._browser.new_context(
+                user_agent=self.headers["User-Agent"], locale=self.locale
+            )
+
+    async def get_rendered_html(self, url: str) -> Optional[str]:
+        """Render a page using Playwright and return its full HTML"""
+        await self._ensure_browser()
+        try:
+            page = await self._context.new_page()
+            await page.goto(url, timeout=self.nav_timeout_ms)
+            await page.wait_for_load_state("networkidle", timeout=self.networkidle_timeout_ms)
+            await asyncio.sleep(self.sleep_between)
+            html = await page.content()
             await page.close()
-            await context.close()
-            await browser.close()
-
-            logger.info(f"[WEBSCRAPING] Succes to get renderized html from {url}.")
-            return rendered
-    except PWTimeout:
-        logger.warning(f"[WEBSCRAPING] Error: the page {url} took a long time to renderize.")
-        return None
-    except Exception as e:
-        logger.warning(f"[WEBSCRAPING] Error in playwright for {url}: {e}")
+            logger.info(f"[WEBSCRAPING] Successfully rendered {url}.")
+            return html
+        except PWTimeout:
+            logger.warning(f"[WEBSCRAPING] Timeout rendering {url}.")
+        except Exception as e:
+            logger.warning(f"[WEBSCRAPING] Error rendering {url}: {e}")
         return None
 
-def get_combined_html(raw_html, rendered_html):
-    combined_html_content = f"""
-    <html>
-    <body>
-        <pre>{raw_html}</pre>
-        <pre>{rendered_html}</pre>
-    </body>
-    </html>
-    """
-    return combined_html_content
-
-async def async_process_pn(pn, session=None, sleep_between=DEFAULT_SLEEP_BETWEEN_REQUESTS):
-    url = f"https://www.findchips.com/search/{pn}"
-    logger.info(f"[WEBSCRAPING] Start the process PN: {pn}...")
-
-
-    close_session = False
-    if session is None:
-        session = aiohttp.ClientSession()
-        close_session = True
-
-    try:
-        raw_html = await async_get_raw_html_from_url(url, session)
-        if not raw_html:
-            logger.warning(f"[WEBSCRAPING] Error to get html from {pn}. Skipping...")
+    async def fetch_part(self, part_number: str) -> Optional[str]:
+        """Fetch and render a single part number from FindChips"""
+        url = f"https://www.findchips.com/search/{part_number}"
+        logger.info(f"[WEBSCRAPING] Fetching PN: {part_number} ({url})")
+        html = await self.get_rendered_html(url)
+        if not html:
+            logger.warning(f"[WEBSCRAPING] Failed to fetch {part_number}. Skipping...")
             return None
+        await asyncio.sleep(self.sleep_between)
+        return html
 
-        await asyncio.sleep(sleep_between)
+    async def fetch_many(self, part_numbers: Iterable[str]) -> Dict[str, str]:
+        """Fetch multiple part numbers concurrently"""
+        semaphore = asyncio.Semaphore(self.max_concurrency)
+        results: Dict[str, str] = {}
 
-        rendered_html = await async_get_rendered_html_from_url(url)
-        if not rendered_html:
-            logger.warning(f"[WEBSCRAPING] Error to get rederized html to PN {pn}. Skipping...")
-            return None
+        async def worker(pn: str):
+            async with semaphore:
+                html = await self.fetch_part(pn)
+                if html:
+                    results[pn] = html
 
-        await asyncio.sleep(sleep_between)
+        await asyncio.gather(*(worker(pn) for pn in part_numbers))
+        return results
 
-        combined_html = get_combined_html(raw_html, rendered_html)
-        return combined_html
-    finally:
-        if close_session and session:
-            await session.close()
-
+    async def aclose(self):
+        """Manually close resources (if not using async with)"""
+        await self.__aexit__(None, None, None)

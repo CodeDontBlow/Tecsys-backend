@@ -1,49 +1,42 @@
 import asyncio
-import aiohttp
+from playwright.async_api import async_playwright, TimeoutError as PWTimeout  # type: ignore
+
+
+from app.log.logger import logger
 from .extractor import extract_from_html
-from .scrapper import async_process_pn, DEFAULT_SLEEP_BETWEEN_REQUESTS
+from .scrapper import AsyncFindChipsScraper
 
-pns = {
-    "01": "CL10C330JB8NNNC",
-    "02": "CL10B472KB8NNNC",
-    "03": "GRM1885C1H180JA01D", 
-    "04": "CL10A106KP8NNNC",
-    "05": "C1608X5R1E106M080AC",
-    "06": "88512006119",
-    "07": "NACE100M100V6.3X8TR13F",
-    "08": "CRCW060320K0FKEA",
-}
-
+# TEST
 async def main():
-    html_results = {}
-    
+    pns = [
+        "CL10C330JB8NNNC",
+        "CL10B472KB8NNNC",
+        "GRM1885C1H180JA01D",
+        "CL10A106KP8NNNC",
+        "C1608X5R1E106M080AC",
+        "88512006119",
+        "NACE100M100V6.3X8TR13F",
+        "CRCW060320K0FKEA",
+    ]
+    target_supplier = "Avnet"
 
-    semaphore = asyncio.Semaphore(4)  
-    
-    async def fetch_pn_with_limit(pn, session):
-        async with semaphore:
-            html_content = await async_process_pn(pn, session, DEFAULT_SLEEP_BETWEEN_REQUESTS)
-            return pn, html_content
-    
+    async with AsyncFindChipsScraper() as scraper:
+        html_by_pn = await scraper.fetch_many(pns)
 
-    async with aiohttp.ClientSession() as session:
-        tasks = [fetch_pn_with_limit(pn, session) for pn in pns.values()]
-        results = await asyncio.gather(*tasks, return_exceptions=True)
-        
-        for result in results:
-            if isinstance(result, Exception):
-                print(f"Error processing PN: {result}")
-                continue
-            pn, html_content = result
-            if html_content:
-                html_results[pn] = html_content
+    for pns, html in html_by_pn.items():
+        print(extract_from_html(html, target_supplier))
 
-    target_supplier = 'Avnet'
-    
-    for html in html_results.values():
-        result = extract_from_html(html, target_supplier)
-        print(result)
 
+"""
+        "CL10C330JB8NNNC",
+        "CL10B472KB8NNNC",
+        "GRM1885C1H180JA01D",
+        "CL10A106KP8NNNC",
+        "C1608X5R1E106M080AC",
+        "88512006119",
+        "NACE100M100V6.3X8TR13F",
+        "CRCW060320K0FKEA",
+"""
 
 if __name__ == "__main__":
     asyncio.run(main())
