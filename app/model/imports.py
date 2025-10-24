@@ -3,13 +3,14 @@ from sqlalchemy import ForeignKey, Integer, String
 from app.model.base import Base
 from sqlalchemy.orm import relationship
 
+
 class Imports(Base):
     """Model for the imports table."""
 
     __tablename__ = "imports"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    product_part_number: Mapped[str] = mapped_column(String(20), nullable=False)
+    product_part_number: Mapped[str] = mapped_column(String(30), nullable=False)
     order_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("orders.id"), nullable=False
     )

@@ -28,7 +28,6 @@ def create_supplier_product_instance(
         supplier_id=supplier.id,
         product_id=product.id,
         erp_description="Test ERP Description",
-        part_number="PN12345",
     )
 
 
@@ -46,4 +45,3 @@ async def test_create_supplier_product(
     assert supplier_product.id is not None
     assert supplier_product.supplier_id == create_supplier_product_instance.supplier_id
     assert supplier_product.product_id == create_supplier_product_instance.product_id
-    assert supplier_product.part_number == create_supplier_product_instance.part_number

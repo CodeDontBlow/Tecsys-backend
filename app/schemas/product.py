@@ -8,6 +8,7 @@ class ProductBase(BaseModel):
     ncm: Annotated[
         str | None,
         Field(
+            default=None,
             title="Product NCM code",
             description="NCM code of the product",
             examples=["87032100"],
@@ -40,7 +41,6 @@ class ProductUpdate(ProductBase):
         Field(
             title="Product Final descriptrion",
             description="Final description of the product by Embedding Model",
-            # examples="",
         ),
     ]
 

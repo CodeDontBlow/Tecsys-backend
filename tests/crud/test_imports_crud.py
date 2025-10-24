@@ -53,7 +53,6 @@ async def create_order_product_manufacturer(
             supplier_id=supplier.id,
             product_id=product.id,
             erp_description="Test ERP Description",
-            part_number="PN12345",
         )
     )
 

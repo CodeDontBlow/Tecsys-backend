@@ -2,7 +2,7 @@ from typing import Annotated
 from app.schemas.order import OrderResponse
 from app.schemas.supplier_product import SupplierProductResponse
 from pydantic import BaseModel, Field
-from app.schemas.manufacturer import ManufacturerBase, ManufacturerResponse
+from app.schemas.manufacturer import ManufacturerResponse
 
 
 class ImportBase(BaseModel):
@@ -13,6 +13,8 @@ class ImportBase(BaseModel):
             title="Product Part Number",
             description="Part number of the product being imported",
             examples=["12345-XYZ"],
+            max_length=30,
+            min_length=1
         ),
     ]
 

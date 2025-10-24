@@ -9,7 +9,7 @@ class Manufacturer(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
-    address: Mapped[str] = mapped_column(String(150), nullable=False)
-    origin_country: Mapped[str] = mapped_column(String(50), nullable=False)
+    address: Mapped[str] = mapped_column(String(150), nullable=True)
+    origin_country: Mapped[str] = mapped_column(String(50), nullable=True)
 
     imports = relationship("Imports", back_populates="manufacturer")

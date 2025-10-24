@@ -10,7 +10,7 @@ class SupplierProduct(Base):
     __tablename__ = "supplier_products"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    part_number: Mapped[str] = mapped_column(String(20), nullable=True)
+    # part_number: Mapped[str] = mapped_column(String(30), nullable=True)
     supplier_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("suppliers.id"), nullable=False
     )
