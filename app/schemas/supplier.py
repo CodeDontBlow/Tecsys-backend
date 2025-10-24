@@ -13,17 +13,6 @@ class BaseSupplier(BaseModel):
         ),
     ]
 
-    part_number: Annotated[
-        str,
-        Field(
-            title="Part Number",
-            description="Part number of the supplier",
-            examples=["12345-XYZ"],
-            max_length=30,
-            min_length=1,
-        ),
-    ]
-
     model_config = {
         "extra": "forbid",
         "str_strip_whitespace": True,
@@ -42,15 +31,6 @@ class SupplierUpdate(BaseSupplier):
             title="Supplier Name",
             description="Name of the supplier",
             examples=["Supplier XYZ"],
-        ),
-    ]
-
-    part_number: Annotated[
-        str | None,
-        Field(
-            title="Part Number",
-            description="Part number of the supplier",
-            examples=["12345-XYZ"],
         ),
     ]
 

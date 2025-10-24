@@ -20,10 +20,10 @@ class EnterPDF:
     def get_supplier_name(self):
         return Find_info.find_supplier_name(self.text)
 
-    def get_erp_desc(self):
+    def get_erp_desc(self, data: dict):
         desc = {
             product["number"]: product["name"]
-            for product in self.data.values()
+            for product in data.values()
         }
         return desc
 

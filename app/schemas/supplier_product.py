@@ -2,7 +2,7 @@ from typing import Annotated
 from app.schemas.supplier import SupplierResponse
 from pydantic import BaseModel, Field
 
-from app.schemas.product import ProductBase, ProductResponse
+from app.schemas.product import ProductResponse
 
 
 class SupplierProductBase(BaseModel):
@@ -32,6 +32,16 @@ class SupplierProductBase(BaseModel):
             examples=[1],
         )
     ]
+    part_number: Annotated[
+        str,
+        Field(
+            title="Part Number",
+            description="Part number of the supplier",
+            examples=["12345-XYZ"],
+            max_length=30,
+            min_length=1,
+        ),
+    ]
 
     model_config = {
         "extra": "forbid",
@@ -54,6 +64,17 @@ class SupplierProductUpdate(BaseModel):
         )
     ]
 
+    part_number: Annotated[
+        str | None,
+        Field(
+            title="Part Number",
+            description="Part number of the supplier",
+            examples=["12345-XYZ"],
+            max_length=30,
+            min_length=1,
+        ),
+    ]
+
     model_config = {
         "extra": "forbid",
         "str_strip_whitespace": True,
@@ -66,12 +87,3 @@ class SupplierProductResponse(BaseModel):
     erp_description: str
     supplier: SupplierResponse
     product: ProductResponse
-
-    #   id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    # supplier_id: Mapped[int] = mapped_column(
-    #     Integer, ForeignKey("suppliers.id"), nullable=False
-    # )
-    # product_id: Mapped[str] = mapped_column(
-    #     Integer, ForeignKey("products.id"), nullable=False
-    # )
-    # erp_description: Mapped[str] = mapped_column(String(255), nullable=True)

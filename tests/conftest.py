@@ -75,7 +75,8 @@ async def create_supplier_and_product(repository_factory) -> Tuple[Supplier, Pro
     product_repo = repository_factory(Product, ProductRepository)
 
     supplier = await supplier_repo.save(
-        SupplierCreate(name="Supplier Test", part_number="PN12345")
+        # SupplierCreate(name="Supplier Test", part_number="PN12345")
+        SupplierCreate(name="Supplier Test")
     )
 
     product = await product_repo.save(

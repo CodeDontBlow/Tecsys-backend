@@ -1,8 +1,8 @@
-"""initial tables
+"""generate-new-database-version
 
-Revision ID: 07d94313683a
+Revision ID: e3517f109bae
 Revises: 
-Create Date: 2025-10-15 21:53:55.322253
+Create Date: 2025-10-23 20:59:33.414099
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '07d94313683a'
+revision: str = 'e3517f109bae'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -41,12 +41,12 @@ def upgrade() -> None:
     )
     op.create_table('suppliers',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('part_number', sa.String(length=20), nullable=True),
     sa.Column('name', sa.String(length=100), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('supplier_products',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('part_number', sa.String(length=20), nullable=True),
     sa.Column('supplier_id', sa.Integer(), nullable=False),
     sa.Column('product_id', sa.Integer(), nullable=False),
     sa.Column('erp_description', sa.String(length=255), nullable=True),
