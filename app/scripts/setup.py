@@ -92,7 +92,7 @@ def pull_ollama_model_embedding():
 def pull_ollama_model_description():
     try:
         caminho = os.path.abspath(CAMINHO_MODELFILE_DESCRIPTUM)
-        logger.info(f"[OLLAMA] Start pulling and create model '{DESCRIPTUM_MODEL}' based on modelfile ") 
+        logger.info(f"[OLLAMA] Start pulling and create model '{DESCRIPTUM_MODEL}' based on modelfile ")
         process = subprocess.Popen(
             ['ollama', 'create', 'descriptum', '-f', caminho],
             stdout=subprocess.PIPE,
@@ -125,9 +125,10 @@ def pull_ollama_model_description():
 def pull_ollama_model_translator():
     try:
         caminho = os.path.abspath(CAMINHO_MODELFILE_TRANSLATOR)
-        logger.info(f"[OLLAMA] Start pulling and create model '{TRANSLATOR_MODEL}' based on modelfile ") 
+        model_tag = f"{TRANSLATOR_MODEL}:latest"
+        logger.info(f"[OLLAMA] Start pulling and create model '{model_tag}' from file: {caminho}") 
         process = subprocess.Popen(
-            ['ollama', 'create', 'descriptum', '-f', caminho],
+            ['ollama', 'create', TRANSLATOR_MODEL, '-f', caminho],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             universal_newlines=True,
@@ -144,6 +145,8 @@ def pull_ollama_model_translator():
         
         if process.returncode == 0:
             logger.info(f"[OLLAMA] Success downloaded and created model '{TRANSLATOR_MODEL}'")
+        else:
+            logger.error(f"[OLLAMA] Failed to create model '{model_tag}' (code {process.returncode})")
 
         
     except subprocess.CalledProcessError as e:

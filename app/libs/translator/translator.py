@@ -1,6 +1,6 @@
 import json
 import asyncio
-from ollama import AsyncClient  # biblioteca padrão da Ollama Python SDK
+from ollama import AsyncClient  # type: ignore
 from app.libs.webscraping.extractor import extract_from_html
 from app.libs.webscraping.scrapper import AsyncFindChipsScraper
 from app.log.logger import logger
@@ -10,10 +10,6 @@ class TranslatorService:
     """Handles translation of product descriptions using the Ollama model."""
 
     def __init__(self, model_name: str = "translator:latest"):
-        """
-        model_name → nome do modelo registrado localmente via Ollama
-        Exemplo: 'translator:latest' (baseado no seu modelfile_translator)
-        """
         self.model_name = model_name
         self.client = AsyncClient()
 
@@ -23,8 +19,10 @@ class TranslatorService:
             return "N/A"
 
         prompt = (
-            f"Traduza a seguinte descrição técnica de componente eletrônico para português "
-            f"brasileiro, mantendo as unidades e o padrão técnico.\n\n{text.strip()}"
+            "Traduza a seguinte descrição técnica de componente eletrônico para o português brasileiro, "
+            "mantendo as unidades, símbolos e formato técnico. "
+            "Responda somente com a tradução final, sem incluir raciocínio, explicações ou texto entre tags <think>.\n\n"
+            f"Descrição original:\n{text.strip()}"
         )
 
         try:
@@ -34,10 +32,16 @@ class TranslatorService:
                 stream=False,
             )
             translated = response["response"].strip()
+
+            # Remove reasoning section if present
+            if "<think>" in translated:
+                import re
+                translated = re.sub(r"<think>.*?</think>", "", translated, flags=re.DOTALL).strip()
+
             return translated
         except Exception as e:
             logger.warning(f"[TRANSLATOR] Failed to translate text: {e}")
-            return text  # fallback para o texto original
+            return text
 
 
 async def run_translation_pipeline():
@@ -61,7 +65,6 @@ async def run_translation_pipeline():
     for pn, html in html_by_pn.items():
         extracted_json = extract_from_html(html, target_supplier)
 
-        # Verifica se o retorno é válido e em formato JSON
         if not extracted_json or not extracted_json.strip().startswith("{"):
             logger.warning(f"[TRANSLATOR] Skipping PN {pn}: invalid extraction output.")
             continue
@@ -74,13 +77,14 @@ async def run_translation_pipeline():
 
         description_en = data.get("description", "N/A")
 
-        # Tradução apenas da descrição
+        # Translate only the description
         translated_desc = await translator.translate_text(description_en)
         data["description_pt"] = translated_desc
 
-        logger.info(f"[TRANSLATOR] {pn} translated successfully.")
-        print(json.dumps(data, indent=4, ensure_ascii=False))
-
+        # ✅ Apenas imprime as descrições
+        print(f"\nEN: {data['description']}")
+        print(f"PT: {data['description_pt']}")
+        print("-" * 80)
 
 
 if __name__ == "__main__":
