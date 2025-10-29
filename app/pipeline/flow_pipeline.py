@@ -6,17 +6,21 @@ from app.libs.final_description.generate_final_desc import Generate_final_desc
 from app.libs.ncm import setup
 from app.libs.webscraping.exc_extractor import webscraping
 from app.libs.websocket.manager import ws_manager
+from app.model import manufacturer
 from app.model.imports import Imports
+from app.model.manufacturer import Manufacturer
 from app.model.order import Order
 from app.model.product import Product
 from app.model.supplier import Supplier
 from app.model.supplier_product import SupplierProduct
 from app.repositories.imports_repository import ImportsRepository
+from app.repositories.manufacturer_repository import ManufacturerRepository
 from app.repositories.order_repository import OrderRepository
 from app.repositories.product_repository import ProductRepository
 from app.repositories.supplier_product_repository import SupplierProductRepository
 from app.repositories.supplier_repository import SupplierRepository
 from app.schemas.imports import ImportCreate
+from app.schemas.manufacturer import ManufacturerCreate
 from app.schemas.order import OrderCreate
 from app.schemas.product import ProductCreate
 from app.schemas.supplier import SupplierCreate
@@ -40,6 +44,7 @@ class PipelineManager:
         )
         self._imports_repo = ImportsRepository(db_session, Imports)
         self._order_repo = OrderRepository(db_session, Order)
+        self._manufacturer_repo = ManufacturerRepository(db_session, Manufacturer)
 
     async def _notify(self, process: str, status: str, error=None) -> dict:
         payload = {"process": process, "status": status, "error": error}
@@ -98,25 +103,22 @@ class PipelineManager:
     async def _get_final_description(self) -> None:
         """Executes the final description generate"""
         try:
-            await self._notify("product_description", "in_progress")
+            await self._notify("description_generate", "in_progress")
 
             count = 0
 
             for product in self._products:
-                if count >= 1:
-                    break
+                # erp_desc = {"name": product.get("name", "")}
+                # manufacturer_desc = product.get("manufacturer_desc", "")
+                # final_description = await Generate_final_desc.generate_final_desc_async(
+                #     erp_desc, manufacturer_desc
+                # )
 
-                erp_desc = {"name": product.get("name", "")} 
-                manufacturer_desc = product.get("manufacturer_desc", "")
-
-                final_description = await Generate_final_desc.generate_final_desc_async(
-                    erp_desc, manufacturer_desc
-                )
-
+                final_description = f"final_description {count}"
                 product["final_description"] = final_description
                 count += 1
 
-            await self._notify("product_description", "success")
+            await self._notify("description_generate", "success")
 
         except Exception as e:
             print(f"⚠️ LLM failed: {e}")
@@ -137,9 +139,18 @@ class PipelineManager:
             counter = 0
             for product in self._products:
                 new_product = await self._product_repo.save(
-                    ProductCreate(final_description="descrição " + str(counter))
+                    ProductCreate(final_description=product["final_description"])
                 )
                 counter += 1
+
+                if "manufacturer" in product and product["manufacturer"] is not None:
+                    manufacturer_name = product["manufacturer"]
+                else:
+                    manufacturer_name = "teste"
+
+                new_manufacturer = await self._manufacturer_repo.save(
+                    ManufacturerCreate(name=manufacturer_name)
+                )
 
                 new_supplier_product = await self._supplier_product_repo.save(
                     SupplierProductCreate(
@@ -164,14 +175,13 @@ class PipelineManager:
 
     async def run(self) -> None:
         try:
-            await self._notify("process_pipeline", "started")
+            await self._notify("pipeline_overall", "started")
             await self._pdf_step()
             await self._web_scrapping()
             await self._get_ncm()
             await self._get_final_description()
-            # await self.save_data()
-            print(self._products)
-            await self._notify("process_overall", "finished")
+            await self.save_data()
+            await self._notify("pipeline_overall", "finished")
         except Exception as e:
             await self._notify("pipeline_overall", "failed", e)
             raise

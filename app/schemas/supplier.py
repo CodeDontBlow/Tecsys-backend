@@ -40,4 +40,3 @@ class SupplierUpdate(BaseSupplier):
 class SupplierResponse(BaseModel):
     id: int
     name: str
-    part_number: str

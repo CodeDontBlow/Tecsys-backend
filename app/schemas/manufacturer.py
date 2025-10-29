@@ -77,5 +77,5 @@ class ManufacturerUpdate(BaseModel):
 class ManufacturerResponse(BaseModel):
     id: int
     name: str
-    address: str
-    origin_country: str
+    # address: str
+    # origin_country: str
