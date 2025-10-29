@@ -6,7 +6,7 @@ class Generate_final_desc:
 
     @staticmethod
     async def generate_final_desc_async(erp_desc, supplier_desc):
-        print(f"Total descriptions to process:{len(erp_desc)}")
+        # print(f"Total descriptions to process:{len(erp_desc)}")
         
         llm_description = 'descriptum:latest'
 
@@ -14,7 +14,7 @@ class Generate_final_desc:
         
         tasks = []
         for i, (codigo, descricao) in enumerate(erp_desc.items(), 1):
-            print(f"  {i}. Código: {codigo} - Descrição: {descricao[:50]} {supplier_desc}...")
+            # print(f"  {i}. Código: {codigo} - Descrição: {descricao[:50]} {supplier_desc}...")
 
 
             task = client.generate(llm_description, descricao + ' ' + supplier_desc)

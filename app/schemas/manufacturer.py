@@ -14,23 +14,23 @@ class ManufacturerBase(BaseModel):
         ),
     ]
 
-    origin_country: Annotated[
-        str,
-        Field(
-            title="Manufacturer Name",
-            description="Name of the manufacturer",
-            examples=["Manufacturer ABC"],
-        ),
-    ]
+    # origin_country: Annotated[
+    #     str,
+    #     Field(
+    #         title="Manufacturer Name",
+    #         description="Name of the manufacturer",
+    #         examples=["Manufacturer ABC"],
+    #     ),
+    # ]
 
-    address: Annotated[
-        str,
-        Field(
-            title="Manufacturer Address",
-            description="Address of the manufacturer",
-            examples=["1234 Industrial Rd, City, Country"],
-        ),
-    ]
+    # address: Annotated[
+    #     str,
+    #     Field(
+    #         title="Manufacturer Address",
+    #         description="Address of the manufacturer",
+    #         examples=["1234 Industrial Rd, City, Country"],
+    #     ),
+    # ]
 
     model_config = {
         "extra": "forbid",
@@ -77,5 +77,5 @@ class ManufacturerUpdate(BaseModel):
 class ManufacturerResponse(BaseModel):
     id: int
     name: str
-    address: str
-    origin_country: str
+    # address: str
+    # origin_country: str

@@ -18,8 +18,8 @@ def manufacturer_repository(
 def manufacturer_create_instace() -> ManufacturerCreate:
     return ManufacturerCreate(
         name="Manufacturer ABC",
-        origin_country="Brazil",
-        address="1234 Industrial Rd, City, Country",
+        # origin_country="Brazil",
+        # address="1234 Industrial Rd, City, Country",
     )
 
 
@@ -27,8 +27,8 @@ def test_invalid_type_for_name_must_raise_exc() -> None:
     with pytest.raises(ValidationError):
         return ManufacturerCreate(
             name=123,  # wrong int type
-            origin_country="Brazil",
-            address="1234 Industrial Rd, City, Country",
+            # origin_country="Brazil",
+            # address="1234 Industrial Rd, City, Country",
         )
 
 
@@ -45,5 +45,5 @@ async def test_save_manufacturer_must_be_success(
     assert new_manufacturer.id is not None
     assert isinstance(new_manufacturer, Manufacturer)
     assert new_manufacturer.name == manufacturer_create_instace.name
-    assert new_manufacturer.origin_country == manufacturer_create_instace.origin_country
-    assert new_manufacturer.address == manufacturer_create_instace.address
+    # assert new_manufacturer.origin_country == manufacturer_create_instace.origin_country
+    # assert new_manufacturer.address == manufacturer_create_instace.address

@@ -39,4 +39,3 @@ async def test_save_order_must_be_success(
     assert new_order is not None
     assert new_order.id is not None
     assert isinstance(new_order, Order)
-    # assert new_order.order_date == order_create_instance.order_date

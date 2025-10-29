@@ -11,12 +11,10 @@ from app.model.supplier import Supplier
 from app.model.supplier_product import SupplierProduct
 from app.repositories.manufacturer_repository import ManufacturerRepository
 from app.repositories.order_repository import OrderRepository
-from app.repositories.product_repository import ProductRepository
 from app.repositories.repository_interface import RepositoryInterface
 from app.repositories.supplier_product_repository import SupplierProductRepository
 from app.schemas.imports import ImportCreate, ImportUpdate
 from app.schemas.manufacturer import ManufacturerCreate
-from app.schemas.product import ProductCreate
 from app.schemas.order import OrderCreate
 from app.repositories.imports_repository import ImportsRepository
 from app.schemas.supplier_product import SupplierProductCreate
@@ -43,8 +41,8 @@ async def create_order_product_manufacturer(
     manufacturer = await manufacturer_repo.save(
         ManufacturerCreate(
             name="Manufacturer ABC",
-            origin_country="Brazil",
-            address="1234 Industrial Rd, City, Country",
+            # origin_country="Brazil",
+            # address="1234 Industrial Rd, City, Country",
         )
     )
 
@@ -82,13 +80,6 @@ def create_import_instance(
         manufacturer_id=manufacturer.id,
         supplier_product_id=supplier_product.id,
     )
-
-
-# @pytest.fixture
-# def update_import_instance() -> ImportUpdate:
-#     """Fixture to provide a valid instance of ImportUpdate schema."""
-#     return ImportUpdate(product_part_number="54321-DEF")
-
 
 def test_invalid_create_import_instance_must_raises_exc():
     """Test that creating an ImportCreate instance with invalid data raises a ValidationError."""
