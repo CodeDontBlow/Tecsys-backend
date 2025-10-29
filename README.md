@@ -1,6 +1,6 @@
 # Tecsys Backend
 
-Backend em **FastAPI** para processamento de PDFs, OCR, web scraping e integração com LLMs, utilizando banco de dados para armazenar os resultados.
+Backend em **FastAPI** para processamento de PDFs com OCR, web scraping, web sockets e integração com LLMs, utilizando banco de dados para armazenar os resultados.
 
 ---
 
@@ -51,7 +51,7 @@ poetry --version
 
 ```powershell
 git clone https://github.com/CodeDontBlow/Tecsys-backend.git
-cd tecsys-backend
+cd Tecsys-backend
 ```
 
 ---
@@ -68,28 +68,21 @@ Isso criará um **ambiente virtual** isolado.
 
 ### 5. Ativar o ambiente virtual do Poetry
 
-No Windows:
-
 ```powershell
 poetry env info  # mostra o caminho do virtualenv
-poetry env activate
+poetry env activate # mostra o caminho para ativar o ambiente virtual
+# copie e cole o comando retornado no terminal
 ```
 
-No Linux/macOS:
-
-```bash
-source $(poetry env info --path)/bin/activate
+| Caso não queira sempre ativar o ambiente virtual, você pode rodar os comandos com "poetry run" para sempre rodar com o ambiente virtual do poetry
+``` bash
+# exemplo
+poetry run pip freeze
 ```
-
----
 
 ### 6. Configurar variáveis de ambiente
 
-Crie um arquivo `.env` na raiz do projeto:
-
-```env
-DATABASE_URL=postgresql+asyncpg://usuario:senha@localhost:5432/descriptum
-```
+Crie um arquivo `.env` na raiz do projeto baseado no arquivo .env.example
 
 ---
 
@@ -123,14 +116,7 @@ alembic upgrade head
 > Isso criará todas as tabelas no banco PostgreSQL.
 ---
 
-### 5. Rodar o projeto
-```env
-DATABASE_URL=sqlite:///./db.sqlite3
-```
-
----
-
-### 9. Setup inicial
+### 5. Setup inicial
 Antes de rodar a API pela primeira vez, você precisa baixar a tabela NCM e popular o banco vetorial.
 
 ```bash
@@ -140,20 +126,20 @@ python -m app.scripts.setup
 ---
 
 
-### 10. Rodar o projeto
+### 6. Rodar o projeto
 
 No terminal do ambiente virtual ativado:
 
 ```powershell
-uvicorn app.main:app --reload
+uvicorn app.main:app
 ```
 
 * O FastAPI estará disponível em [http://127.0.0.1:8000](http://127.0.0.1:8000)
-* O parâmetro `--reload` ativa o auto-reload para desenvolvimento.
+
 
 ---
 
-### 11. Acessar documentações
+### 6. Acessar documentações
 
 Acesse:
 
@@ -167,7 +153,7 @@ Você verá a **interface Swagger** do FastAPI.
 
 ### Observações importantes
 
-* Sempre ative o **virtualenv do Poetry** antes de rodar o `uvicorn`.
+* Sempre ative o **virtualenv do Poetry** antes de rodar o `uvicorn`, ou utilize `poetry run uvicorn app.main:app`
 * Todas as bibliotecas do projeto estão isoladas nesse ambiente.
 * Ao clonar o projeto em outro computador, basta rodar `poetry install` e ativar o ambiente.
 * Rode o `script.setup` **uma única vez** antes de iniciar a API.
