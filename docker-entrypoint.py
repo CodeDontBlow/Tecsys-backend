@@ -49,9 +49,9 @@ def create_database():
         
         if not exists:
             cursor.execute("CREATE DATABASE descriptum")
-            logger.info("[DOCKER] Database 'descriptum' created successfully")
+            print("[DOCKER] Database 'descriptum' created successfully")
         else:
-            logger.info("[DOCKER] Database 'descriptum' already exists")
+            print("[DOCKER] Database 'descriptum' already exists")
         
         cursor.close()
         conn.close()
@@ -62,9 +62,15 @@ def create_database():
         return False
 
 def main():
-    logger.info("[DOCKER] Checking/Creating descriptum database...")
+
+    print("[DOCKER] Checking environment variables...")
+    print(f"DATABASE_URL: {os.getenv('DATABASE_URL')}")
+    print(f"POSTGRES_USER: {os.getenv('POSTGRES_USER')}")
+    print(f"POSTGRES_HOST: {os.getenv('POSTGRES_HOST')}")
+    
+    print("[DOCKER] Checking/Creating descriptum database...")
     if not create_database():
-        logger.warning("[DOCKER] Could not create descriptum database")
+        print("[DOCKER] Could not create descriptum database")
     
     if not run_command(["which", "ollama"]):
         print("[DOCKER] Ollama not found")
@@ -75,22 +81,22 @@ def main():
     for i in range(10):  
         if check_ollama_ready():
             break
-        logger.info(f"[DOCKER] Waiting for Ollama to start... ({i+1}/10)")
+        print(f"[DOCKER] Waiting for Ollama to start... ({i+1}/10)")
         time.sleep(3)
     else:
         print("[DOCKER] Ollama failed to start")
         ollama_process.terminate()
         sys.exit(1)
     
-    logger.info("[DOCKER] Running ChromaDB setup...")
+    print("[DOCKER] Running ChromaDB setup...")
     run_command(["poetry", "run", "python", "-m", "app.scripts.setup"])
     
     # Add Alembic migration
-    logger.info("[DOCKER] Running database migrations...")
+    print("[DOCKER] Running database migrations...")
     if not run_command(["poetry", "run", "alembic", "upgrade", "head"]):
-        logger.warning("[DOCKER] Alembic migration failed")
+        print("[DOCKER] Alembic migration failed")
     
-    logger.info("[DOCKER] Starting server...")
+    print("[DOCKER] Starting server...")
     run_command(["poetry", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"])
 
 if __name__ == "__main__":
