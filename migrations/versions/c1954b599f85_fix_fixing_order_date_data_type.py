@@ -1,8 +1,8 @@
-"""generate-new-database-version
+"""fix: fixing order_date data type
 
-Revision ID: dd7278e49b73
+Revision ID: c1954b599f85
 Revises: 
-Create Date: 2025-10-24 08:42:42.097335
+Create Date: 2025-10-29 08:47:33.004674
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'dd7278e49b73'
+revision: str = 'c1954b599f85'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -30,7 +30,7 @@ def upgrade() -> None:
     )
     op.create_table('orders',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('order_date', sa.Date(), nullable=False),
+    sa.Column('order_date', sa.DateTime(timezone=True), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('products',

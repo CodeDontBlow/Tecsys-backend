@@ -2,11 +2,9 @@ import asyncio
 from datetime import datetime
 import traceback
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.libs.final_description.generate_final_desc import Generate_final_desc
 from app.libs.ncm import setup
 from app.libs.webscraping.exc_extractor import webscraping
 from app.libs.websocket.manager import ws_manager
-from app.model import manufacturer
 from app.model.imports import Imports
 from app.model.manufacturer import Manufacturer
 from app.model.order import Order

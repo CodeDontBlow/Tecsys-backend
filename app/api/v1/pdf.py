@@ -13,7 +13,6 @@ async def upload_pdf(pdf: UploadFile = File(...), db_session: AsyncSession = Dep
 
     order_date = datetime.now(timezone.utc)
 
-
     manager = PipelineManager(pdf_bytes, db_session, order_date)
 
     await enqueue_task(manager.run)
