@@ -1,57 +1,49 @@
-# Nome do pull request.
-
+# Nome do pull request
 <!--- Forneça um resumo geral das suas alterações no título acima -->
+
 
 ## Tipo de Pull Request:
 
 <!-- - [] Correção de Bug (Bugfix) -->
 <!-- - [] Nova Funcionalidade (Feature) -->
-<!-- - [] Atualização de estilo de código (formatação, renomeação) -->
-<!-- - [] Refatoração (sem alterações funcionais, sem mudanças na API) -->
-<!-- - [] Alterações relacionadas à construção (Build) -->
-<!-- - [] Alterações de documentação -->
-<!-- - [] Outro (descreva): -->
+<!-- - [] Melhoria de Performance (Performance Improvement) -->
+<!-- - [] Refatoração (sem alterações funcionais) -->
+<!-- - [] Atualização de Dependências (Dependency Update) -->
+<!-- - [] Documentação (Documentation) -->
+<!-- - [] Estilo/Formatação (Code Style) -->
+<!-- - [] Testes (Tests) -->
+<!-- - [] Configuração/DevOps (CI/CD, Infrastructure) -->
+<!-- - [] Outro (descreva abaixo): -->
 
-#### Código da task no jira: 
+## Referência da Task
+
+**Jira/Ticket:** [LINK_OU_CODIGO_DA_TASK]
+
+## Descrição das Alterações - Changelog
+<!-- Descreva resumidamente o que foi feito utilizando bullet points -->
+-
+-
+-
+-
 
 
-## O que foi feito nesta branch? - Changelog
-<!-- Descreva resumidamente as principais alterações implementadas nesta branch.
-utilize bullets points para que fique mais simples e direto de ler -->
-- 
-- 
-- x
-  - a
-  - b
-  - c
+## Instruções de Teste
 
-
-
-## Instruções de Como Testar
-<!-- Forneça passos claros e detalhados para testar as alterações -->
-
-1. 
+**Passos para testar:**
+1. teste
 2. 
+3. 
 
-<!-- 
-```<linguagem>
+**Resultado esperado:**
+- xyz
 
-```
+## Reviewers Recomendados
+<!-- motivos podem ser genéricos, como contextualização do pr e alinhamento de features novas -->
+1. @ - Motivo:
+2. @ - Motivo:
+3. @ - Motivo:
 
-Caso precise colocar algum trecho de codigo, utilize o md acima para facilitar o copiar e colar do script
+## Observações
 
- -->
-
-
-## Quem poderá testar?
-<!-- Liste pelo menos 3 pessoas que devem testar estas alterações -->
-
-1. Nome: @   - **Motivo:**
-2. Nome: @   - **Motivo:**
-3. Nome: @   - **Motivo:**
-
-<!-- Caso necessário: -->
-
-<!-- 
-**Observações Adicionais:** 
-[Adicione quaisquer observações ou considerações importantes aqui] -->
+<!-- Adicione observações importantes ou dependências -->
+<!-- Observações essas que podem ser futuras features ou problemas durante o desenvolvimento que merecem atenção -->
