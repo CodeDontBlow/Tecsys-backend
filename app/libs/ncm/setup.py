@@ -9,19 +9,39 @@ async def get_ncm(query: str) -> dict:
         response: Response = chroma_manager.search_ncm(query)
         if not response:
             raise HTTPException(status_code=404, detail="Not Found")
+        
+        list = []
+        father = None
+        childrens = []
+        for r in response.results:
+            item = {
+                "ncm_code": r.ncm_code,
+                "description": r.description,
+                "aliquot": r.aliquot,
+                "distance": r.distance
+            }
+
+            if r.is_parent:
+                if father:
+                    list.append({
+                        "ncm_6": father,
+                        "ncm_8": childrens
+                    })
+                #reset ......
+                father = item
+                childrens = []
+            else:
+                childrens.append(item)
+        if father:
+            list.append({
+                "ncm_6": father,
+                "ncm_8": childrens
+            })
+
         return {
             "query original": query,
-            "results": [
-                {
-                    "ncm_code": r.ncm_code,
-                    "description": r.description,
-                    "distance": r.distance,
-                    "aliquot": r.aliquot,
-                    "is_parent": r.is_parent
-                }
-                for r in response.results
-            ]
+            "ncms": list
         }
+
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
-    
