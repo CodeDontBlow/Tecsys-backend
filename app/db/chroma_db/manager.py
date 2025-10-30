@@ -113,7 +113,7 @@ class ChromaDBManager:
             ncm_results = []
             seen_parents = set()
             parent_count = 0
-            max_parents = 3
+            max_parents = 5
             max_children = 3
 
             metas = results['metadatas'][0]
