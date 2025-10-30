@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import os
 import subprocess
 import sys
 import time
@@ -24,7 +25,6 @@ def check_ollama_ready():
     except:
         return False
 
-import os
 
 def create_database():
     """Create descriptum database if it doesn't exist"""
