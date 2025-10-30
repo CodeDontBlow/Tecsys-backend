@@ -27,8 +27,6 @@ from app.schemas.supplier_product import SupplierProductCreate
 from app.libs.extract_pdf.enterPDF import EnterPDF
 from app.libs.extract_pdf.extract_json import Extract_json
 
-# from app.services.ollama_service.generate_final_desc import Generate_final_desc
-
 
 class PipelineManager:
     def __init__(self, pdf_bytes: str, db_session: AsyncSession, order_date: datetime):
@@ -68,6 +66,8 @@ class PipelineManager:
         await asyncio.to_thread(processer.process_enter)
 
         pdf_json = Extract_json.extract(processer.text)
+        print(pdf_json)
+
         self._supplier = pdf_json["supplier"]
         self._products = pdf_json["products"]
         await self._notify("pdf_extraction", "success")
@@ -82,6 +82,8 @@ class PipelineManager:
             for content in results:
                 if not isinstance(content, dict):
                     continue
+
+                print(content)
                 product_part_number = content.get("product_part_number")
                 if not product_part_number:
                     continue
@@ -120,9 +122,9 @@ class PipelineManager:
             "Oscilador XO 26MHz ±50ppm 15pF HCMOS 55% 3.3V automotivo AEC-Q200 4 pinos montagem Mini-CSMD T/R"   
         ]
 
-        for query in query_list:
-            self._ncm_founded = await setup.get_ncm(query)
-            
+        tasks = [setup.get_ncm(query) for query in query_list]
+        self.ncms = await asyncio.gather(*tasks)
+
         await self._notify("get_ncms", "success")
 
     async def _get_final_description(self) -> None:
@@ -132,14 +134,12 @@ class PipelineManager:
 
             erp_desc = {"name": self._products[0].get("name", "")}
             manufacturer_desc = self._products[0].get("manufacturer_desc", "")
-            generated_desc = (
-                await Generate_final_desc.generate_final_desc_async(
-                    erp_desc, manufacturer_desc
-                )
+            generated_desc = await Generate_final_desc.generate_final_desc_async(
+                erp_desc, manufacturer_desc
             )
 
-            self._products[0]["final_description"] = generated_desc['name']
-            self._products[5]['final_description'] = "NÃO ENCONTRADO"
+            self._products[0]["final_description"] = generated_desc["name"]
+            self._products[5]["final_description"] = "NÃO ENCONTRADO"
 
             parts_data = [
                 {
@@ -210,7 +210,7 @@ class PipelineManager:
             ]
 
             for data in parts_data:
-                self._products[data['id']]['final_description'] = data['description']
+                self._products[data["id"]]["final_description"] = data["description"]
 
             await self._notify("description_generate", "success")
 
@@ -233,7 +233,10 @@ class PipelineManager:
             counter = 0
             for product in self._products:
                 new_product = await self._product_repo.save(
-                    ProductCreate(final_description=product["final_description"])
+                    ProductCreate(
+                        final_description=product["final_description"],
+                        erp_code=product["erp_code"],
+                    )
                 )
                 counter += 1
 
@@ -275,7 +278,7 @@ class PipelineManager:
             await self._get_ncm()
             await self._get_final_description()
             await self.save_data()
-            await self._notify("pipeline_overall", "finished", '', {"ncms": self.ncms})
+            await self._notify("pipeline_overall", "finished", "", {"ncms": self.ncms})
         except Exception as e:
             await self._notify("pipeline_overall", "failed", e)
             raise

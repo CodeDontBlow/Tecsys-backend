@@ -1,8 +1,8 @@
 """fixing_final_description
 
-Revision ID: 74b815b5b8e8
+Revision ID: d3ffaca8ae84
 Revises: 
-Create Date: 2025-10-30 10:36:51.649075
+Create Date: 2025-10-30 16:37:52.303360
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '74b815b5b8e8'
+revision: str = 'd3ffaca8ae84'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -37,6 +37,7 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('ncm', sa.String(length=10), nullable=True),
     sa.Column('final_description', sa.String(), nullable=False),
+    sa.Column('erp_code', sa.String(), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('suppliers',

@@ -11,6 +11,7 @@ class Product(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     ncm: Mapped[str] = mapped_column(String(10), nullable=True)
     final_description: Mapped[str] = mapped_column(String, nullable=False)
+    erp_code: Mapped[str] = mapped_column(String, nullable=False)
 
     supplier_product = relationship("SupplierProduct", back_populates="product")
 
