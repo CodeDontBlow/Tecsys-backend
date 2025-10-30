@@ -127,7 +127,7 @@ def install_chromium():
         logger.info("[WEBSCRAPING] Install chromium browser to use in webscraping.")
         
         process = subprocess.Popen(
-            ['playwright', 'install', 'chromium'],
+            ['poetry', 'run', 'playwright', 'install', 'chromium'],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             universal_newlines=True,
