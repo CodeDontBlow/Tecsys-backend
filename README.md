@@ -39,7 +39,9 @@ Um backend moderno desenvolvido em **FastAPI** para processamento inteligente de
 ---
 
 ## Estrutura do Projeto
-
+<details>
+   <summary> Clique para expandir a extrutura do projeto</summary>
+   
 ```
 tecsys-backend/
 ├── 📁 app/                           # Código principal da aplicação
@@ -151,6 +153,8 @@ tecsys-backend/
 ├── 📄 pyproject.toml                 # Configuração do Poetry
 └── 📄 README.md                      # Este arquivo
 ```
+
+</details>
 
 ---
 
@@ -551,3 +555,4 @@ docker-compose exec -it backend bash
 Para issues e dúvidas técnicas, consulte a documentação das tecnologias mencionadas ou abra uma issue no repositório do projeto.
 
 # Com carinho, Code Don't Blow💣
+- Readme atualizado dia 29/10/2026
