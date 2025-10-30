@@ -23,6 +23,7 @@ Um backend moderno desenvolvido em **FastAPI** para processamento inteligente de
 ---
 
 ## Requisitos do Sistema
+> [Voltar para o índice](#índice)
 
 ### Dependências Principais
 - **Python**: Versão 3.9 ou superior (recomendado 3.9 a 3.13)
@@ -39,6 +40,8 @@ Um backend moderno desenvolvido em **FastAPI** para processamento inteligente de
 ---
 
 ## Estrutura do Projeto
+> [Voltar ao Índice](#índice)
+
 <details>
    <summary> Clique para expandir a extrutura do projeto</summary>
    
@@ -159,6 +162,7 @@ tecsys-backend/
 ---
 
 ## Instalação Manual
+> [Voltar ao Índice](#índice)
 
 ### Pré-requisitos
 
@@ -187,6 +191,13 @@ python3 --version
 ```bash
 # Instalação via pip
 pip install poetry
+
+# Outras opções de instalação
+#     Usando Homebrew
+brew install poetry
+
+#     Usando pip3
+pip3 install poetry 
 
 # Ou use o script oficial
 curl -sSL https://install.python-poetry.org | python3 -
@@ -289,6 +300,7 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000
 ---
 
 ## Instalação com Docker
+> [Voltar ao Índice](#índice)
 
 ### Configuração Rápida
 
@@ -356,6 +368,8 @@ O arquivo `docker-compose.yml` define os seguintes serviços:
 ---
 
 ## Configuração de Ambiente
+> [Voltar ao Índice](#índice)
+
 
 ### Variáveis de Ambiente Críticas
 
@@ -379,6 +393,8 @@ DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGR
 ---
 
 ## Arquitetura e Componentes
+> [Voltar ao Índice](#índice)
+
 
 ### Camadas da Aplicação
 
@@ -408,6 +424,7 @@ DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGR
 ---
 
 ## Documentação da API
+> [Voltar ao Índice](#índice)
 
 ### Acessando a Documentação
 
@@ -440,6 +457,8 @@ curl -X POST "http://localhost:8000/api/v1/pdf/upload" \
 ---
 
 ## Desenvolvimento e Testes
+> [Voltar ao Índice](#índice)
+
 
 ### Executando Testes
 
@@ -460,6 +479,7 @@ poetry run pytest tests/crud/test_product_crud.py
 ---
 
 ## Referências Técnicas
+> [Voltar ao Índice](#índice)
 
 ### Frameworks e Bibliotecas Principais
 
