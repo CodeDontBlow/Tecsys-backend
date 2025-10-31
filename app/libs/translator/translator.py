@@ -54,6 +54,13 @@ async def run_translation_pipeline():
         "C1608X5R1E106M080AC",
         "NACE100M100V6.3X8TR13F",
         "CRCW060320K0FKEA",
+        "ERJ-2RKF2201X",
+        "BC847BLT1G",
+        "IRLML6401TRPBF",
+        "STPS5H100B-TR",
+        "ESD7C3.3DT5G",
+        "LD1117ADT-TR",
+        "ECS-3225Q-33-260-BS-TR"
     ]
     target_supplier = "Avnet"
 

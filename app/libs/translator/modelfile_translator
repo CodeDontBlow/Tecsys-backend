@@ -59,5 +59,33 @@ Você deve traduzir para "Capacitor cerâmico 10 µF 25 V X5R ±20%, encapsulame
 
 7. Para "RES, THICK FILM, 20K, 1%, 0.1W, 0603, REEL, Resistor Case Style:0603 [1608 Metric], Resistance:20kΩ, Product Range:CRCW Series, Voltage Rating:75V, Resistor Element Type:Thick Film, Power Rating:100mW, Resistance Tolerance:±1%"  
 
-Você deve traduzri para "Resistor de filme espesso 20 kΩ ±1%, 0,1 W, encapsulamento 0603 (1608 métrico), série CRCW, tensão nominal 75 V – embalagem em carretel. Tipo de elemento resistivo: filme espesso; Potência nominal: 100 mW; Tolerância: ±1%."
+Você deve traduzir para "Resistor de filme espesso 20 kΩ ±1%, 0,1 W, encapsulamento 0603 (1608 métrico), série CRCW, tensão nominal 75 V – embalagem em carretel. Tipo de elemento resistivo: filme espesso; Potência nominal: 100 mW; Tolerância: ±1%."
+
+8. Para "Res, Thick Film, 2K2, 1%, 0.1W, 0402, Resistance:2.2Kohm, Resistance Tolerance:± 1%, Power Rating:100Mw, Resistor Case/Package:0402 [1005 Metric], Resistor Technology:Thick Film, Resistor Type:Precision, Voltage Rating:50V Rohs Compliant: Yes |Panasonic ERJ2RKF2201X"
+
+Você deve traduzir para "Resistor de filme espesso 2,2 kΩ ±1%, 0,1 W, encapsulamento 0402 (1005 métrico), tipo de alta precisão, tensão nominal 50 V – compatível com RoHS. Tipo de tecnologia: filme espesso; Potência nominal: 100 mW; Tolerância: ±1%; Resistência: 2,2 kΩ."
+
+9. Para "Transistor, Npn, 45V, 100Ma, Sot-23-3, Transistor Polarity:Npn, Collector Emitter Voltage V(Br)Ceo:45V, Transition Frequency Ft:100Mhz, Power Dissipation Pd:300Mw, Dc Collector Current:100Ma, Dc Current Gain Hfe:200Hfe, Transistor Rohs Compliant: Yes |Onsemi BC847BLT1G"
+
+Você deve traduzir para "Transistor NPN 45 V 100 mA, encapsulamento SOT-23-3, frequência de transição 100 MHz, dissipação de potência 300 mW, corrente de coletor contínua 100 mA, ganho de corrente contínua (hFE) 200, tensão coletor-emissor V(Br)Ceo 45 V – compatível com RoHS."
+
+10. Para "P Channel Mosfet, -12V, -4.3A Sot-23, Channel Type:P Channel, Drain Source Voltage Vds:12V, Continuous Drain Current Id:4.3A, Transistor Mounting:Surface Mount, Rds(On) Test Voltage:4.5V, Gate Source Threshold Voltage Max:550Mv Rohs Compliant: Yes |Infineon IRLML6401TRPBF"
+
+Você deve traduzir para "Transistor MOSFET de canal P, −12 V, −4,3 A, encapsulamento SOT-23, montagem em superfície. Tensão drenagem-fonte (Vds): −12 V; Corrente de drenagem contínua (Id): −4,3 A; Tensão de teste Rds(on): 4,5 V; Tensão limiar porta-fonte máxima (Vgs(th)): 550 mV – compatível com RoHS."
+
+11. Para "Rectifier Diode, Single, 100 V, 5 A, To-252, 3, 730 Mv Rohs Compliant: Yes |Stmicroelectronics STPS5H100B-TR"
+
+Você deve traduzir para "Diodo retificador Schottky simples, 100 V, 5 A, encapsulamento TO-252 (DPAK), queda de tensão direta 730 mV – compatível com RoHS."
+
+12. Para "Diode, Esd Protection, Sot-723, Clamping Voltage Vc Max:-, Diode Case Style:Sot-723, No. Of Pins:3Pins, Operating Voltage:3.3V, Power Dissipation Pd:240Mw, Product Range:Esd7C Series, Automotive Qualification Standard:Aec-Q101, Rohs Compliant: Yes |Onsemi ESD7C3.3DT5G"
+
+Você deve traduzir para "Diodo de proteção ESD, encapsulamento SOT-723, 3 pinos, tensão de operação 3,3 V, dissipação de potência 240 mW, série ESD7C, qualificação automotiva AEC-Q101 – compatível com RoHS."
+
+13. Para "Ldo, Adj, 1A, 0 To 125Deg C, Output Type:Adjustable, Input Voltage Min:-, Input Voltage Max:10V, Fixed Output Voltage Nom.:-, Adjustable Output Voltage Min:1.25V, Adjustable Output Voltage Max:-, Output Current:1A, Dropout Voltage Rohs Compliant: Yes |Stmicroelectronics LD1117ADT-TR"
+
+Você deve traduzir para "Regulador linear LDO ajustável, 1 A, faixa de temperatura de operação de 0 °C a 125 °C, tensão de entrada máxima 10 V, tensão de saída ajustável mínima 1,25 V – compatível com RoHS."
+
+14. Para " XTAL OSC XO 26.0000MHZ HCMOS SMD"
+
+Você deve traduzir para "Oscilador de cristal (XO) 26,0000 MHz, saída HCMOS, montagem em superfície (SMD) – compatível com RoHS."
 """
