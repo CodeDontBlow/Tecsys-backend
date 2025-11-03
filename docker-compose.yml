@@ -5,31 +5,31 @@ services:
       - "8000:8000"
     env_file:
       - .env
-    environment:
-      - EMBEDDING_MODEL=qwen3-embedding:0.6b
-      - CSV_PATH=app/util/tipi/tipi_chapter_85.csv
-      - CHROMA_DB_PATH=/app/db/chroma_db/collection
-      - COLLECTION_NAME=ncm_85_collection
     volumes:
       - .:/app
       - ./data:/app/data
       - chroma_data:/app/db/chroma_db/collection 
       - ollama_data:/root/.ollama   
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     restart: unless-stopped
 
   db:
     image: postgres:15
     environment:
-      - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d descriptum"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     restart: unless-stopped
 
 volumes:
