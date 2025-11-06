@@ -108,3 +108,75 @@ async def test_create_import_must_be_success(
     assert new_import.order_id == create_import_instance.order_id
     assert new_import.manufacturer_id == create_import_instance.manufacturer_id
     assert new_import.supplier_product_id == create_import_instance.supplier_product_id
+
+
+@pytest.mark.asyncio
+async def test_list_all_imports_must_be_sucess(
+    import_repository: RepositoryInterface[ImportCreate, ImportUpdate, Imports],
+    create_import_instance: ImportCreate,
+) -> None:
+    await import_repository.save(create_import_instance)
+
+    imports_list = await import_repository.list_all()
+
+    assert isinstance(imports_list, list)
+    assert len(imports_list) > 0
+    for import_created in imports_list:
+      assert isinstance(import_created, Imports)
+
+@pytest.mark.asyncio
+async def test_list_all_imports_must_return_last(
+        import_repository: RepositoryInterface[ImportCreate, ImportUpdate, Imports],
+        create_import_instance: ImportCreate,
+        repository_factory,
+) -> None:
+
+    order_repo = repository_factory(Order, OrderRepository)
+    new_order = await order_repo.save(
+        OrderCreate(
+            order_date=datetime.datetime.fromisoformat("2023-10-05T14:50:00.000Z")
+        )
+    )
+    create_import_instance_recent = ImportCreate(
+        product_part_number="54321-XYZ",
+        order_id=new_order.id,
+        manufacturer_id=create_import_instance.manufacturer_id,
+        supplier_product_id=create_import_instance.supplier_product_id
+      )
+
+    # Fisrt instance
+    await import_repository.save(create_import_instance)
+
+    # Secont instance with more recent order date
+    await import_repository.save(create_import_instance_recent)
+
+    imports_list = await import_repository.list_all()
+    assert isinstance(imports_list, list)
+    assert len(imports_list) == 1  
+
+    # Verify if the import returned is the most recent one
+    assert imports_list[0].order_id == new_order.id
+
+@pytest.mark.asyncio
+async def test_update_import_must_be_sucess(
+    import_repository: RepositoryInterface[ImportCreate, ImportUpdate, Imports],
+    create_import_instance: ImportCreate,
+) -> None:
+
+    new_import = await import_repository.save(create_import_instance)
+
+    update_data = ImportUpdate(
+        product_part_number="UPDATED-12345"
+    )
+
+    updated_import = await import_repository.update(
+        new_import.id, update_data
+    )
+
+    assert updated_import is not None
+    assert updated_import.id == new_import.id
+    assert updated_import.product_part_number == "UPDATED-12345"
+    assert updated_import.order_id == new_import.order_id
+    assert updated_import.manufacturer_id == new_import.manufacturer_id
+    assert updated_import.supplier_product_id == new_import.supplier_product_id       
+

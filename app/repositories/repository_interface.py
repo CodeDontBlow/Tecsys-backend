@@ -20,7 +20,7 @@ class RepositoryInterface(ABC, Generic[TCreate, TUpdate, TModel]):
         pass
 
     @abstractmethod
-    async def update(self, obj_data: TUpdate) -> TModel:
+    async def update(self, obj_id:int, obj_data: TUpdate) -> TModel:
         pass
 
     @abstractmethod
