@@ -1,6 +1,7 @@
 from typing import List, Type
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import update, select
 
 from app.model.manufacturer import Manufacturer
 from app.repositories.repository_interface import RepositoryInterface
@@ -29,13 +30,23 @@ class ManufacturerRepository(
             raise e
 
     async def list_all(self) -> List[Manufacturer]:
-        pass
+        """List all manufacturers."""
+        stmt = select(self.model)
+        result = await self.db_session.execute(stmt)
+        return result.scalars().all()
 
     async def get_by_id(self, obj_id: int) -> Manufacturer:
         pass
 
-    async def update(self, obj_data: ManufacturerUpdate) -> Manufacturer:
-        pass
+    async def update(self, obj_id: int, obj_data: ManufacturerUpdate) -> Manufacturer:
+        stmt = (
+            update(self.model)
+            .where(self.model.id == obj_id)
+            .values(**obj_data.model_dump(exclude_unset=True))
+            .returning(self.model)
+        )
+        result = await self.db_session.execute(stmt)
+        return result.scalars().first()
 
     async def delete(self, obj_id: int) -> None:
         pass

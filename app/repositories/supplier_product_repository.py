@@ -1,6 +1,7 @@
 # Third-party imports
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy import update
 from typing import Optional, Type, List
 
 # Local imports
@@ -39,8 +40,15 @@ class SupplierProductRepository(
     async def get_by_id(self, obj_id: int) -> SupplierProduct:
         pass
 
-    async def update(self, obj_data: SupplierProductUpdate) -> SupplierProduct:
-        pass
+    async def update(self, obj_id: int, obj_data: SupplierProductUpdate) -> SupplierProduct:
+        stmt = (
+            update(self._model)
+            .where(self._model.id == obj_id)
+            .values(**obj_data.model_dump(exclude_unset=True))
+            .returning(self._model)
+        )
+        result = await self._db_session.execute(stmt)
+        return result.scalars().first()
 
     async def delete(self, obj_id: int) -> None:
         pass

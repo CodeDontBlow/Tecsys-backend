@@ -1,6 +1,7 @@
 # Third-party imports
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy import update
 from typing import Type, Optional, List
 
 # Local imports
@@ -35,8 +36,15 @@ class ProductRepository(RepositoryInterface[ProductCreate, ProductUpdate, Produc
     async def get_by_id(self, obj_id: int) -> Optional[Product]:
         pass
 
-    async def update(self, obj_data: ProductUpdate) -> Product:
-        pass
+    async def update(self, obj_id: int, obj_data: ProductUpdate) -> Product:
+        stmt = (
+            update(self.model)
+            .where(self.model.id == obj_id)
+            .values(**obj_data.model_dump(exclude_unset=True))
+            .returning(self.model)
+        )
+        result = await self._db_session.execute(stmt)
+        return result.scalars().first()
 
     async def delete(self, obj_id: int) -> None:
         pass

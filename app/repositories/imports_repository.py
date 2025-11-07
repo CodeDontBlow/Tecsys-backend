@@ -33,6 +33,7 @@ class ImportsRepository(RepositoryInterface[ImportCreate, ImportUpdate, Imports]
             raise e
 
     async def list_all(self) -> List[Imports]:
+      """List all imports from the most recent order."""
       subq = select(func.max(Order.order_date)).scalar_subquery()
       stmt = (
         select(Imports)  
@@ -44,6 +45,22 @@ class ImportsRepository(RepositoryInterface[ImportCreate, ImportUpdate, Imports]
             joinedload(Imports.order),  
         )
         .where(Order.order_date == subq)  
+    )
+
+      result = await self._db_session.execute(stmt) 
+      return result.scalars().all()
+
+    async def list_by_order_id(self, order_id: int) -> List[Imports]:
+      stmt = (
+        select(Imports)  
+        .join(Imports.order) 
+        .options(
+            joinedload(Imports.manufacturer), 
+            joinedload(Imports.supplier_product).joinedload(SupplierProduct.supplier),  
+            joinedload(Imports.supplier_product).joinedload(SupplierProduct.product),  
+            joinedload(Imports.order),  
+        )
+        .where(Imports.order_id == order_id)  
     )
 
       result = await self._db_session.execute(stmt) 
