@@ -73,3 +73,7 @@ class ImportResponse(BaseModel):
     manufacturer: ManufacturerResponse
     supplier_product: SupplierProductResponse
     order: OrderResponse
+
+class ImportUpdateResponse(BaseModel):
+    id: int
+    product_part_number: str

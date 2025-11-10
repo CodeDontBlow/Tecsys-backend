@@ -1,7 +1,7 @@
 # Third-party imports
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy import update
+from sqlalchemy import update, select
 from typing import Type, Optional, List
 
 # Local imports
@@ -31,7 +31,9 @@ class ProductRepository(RepositoryInterface[ProductCreate, ProductUpdate, Produc
             raise e
 
     async def list_all(self) -> List[Product]:
-        pass
+        stmt = select(self.model)
+        result = await self._db_session.execute(stmt)
+        return result.scalars().all()
 
     async def get_by_id(self, obj_id: int) -> Optional[Product]:
         pass
@@ -44,7 +46,12 @@ class ProductRepository(RepositoryInterface[ProductCreate, ProductUpdate, Produc
             .returning(self.model)
         )
         result = await self._db_session.execute(stmt)
-        return result.scalars().first()
+        updated = result.scalars().first()
+        if updated is None:
+            return None
+        await self._db_session.commit()
+        await self._db_session.refresh(updated)
+        return updated
 
     async def delete(self, obj_id: int) -> None:
         pass

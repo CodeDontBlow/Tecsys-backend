@@ -27,9 +27,6 @@ class OrderRepository(RepositoryInterface[OrderCreate, OrderUpdate, Order]):
             await self._db_session.rollback()
             raise e
 
-    async def list_all(self) -> List[Order]:
-        pass
-
     async def get_by_id(self, obj_id: int) -> Optional[Order]:
         pass
 

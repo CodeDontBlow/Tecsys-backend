@@ -1,6 +1,8 @@
 # Third-party imports
+from app.model.supplier_product import SupplierProduct
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import update
+from sqlalchemy import update, select
+from sqlalchemy.orm import joinedload
 from typing import Type, Optional, List
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -31,7 +33,7 @@ class SupplierRepository(RepositoryInterface[SupplierCreate, SupplierUpdate, Sup
             raise e
 
     async def list_all(self) -> List[Supplier]:
-        pass
+      pass
 
     async def get_by_id(self, obj_id: int) -> Optional[Supplier]:
         pass
@@ -44,7 +46,12 @@ class SupplierRepository(RepositoryInterface[SupplierCreate, SupplierUpdate, Sup
             .returning(self._model)
         )
         result = await self._db_session.execute(stmt)
-        return result.scalars().first()
+        updated = result.scalars().first()
+        if updated is None:
+            return None
+        await self._db_session.commit()
+        await self._db_session.refresh(updated)
+        return updated
 
     async def delete(self, obj_id: int) -> None:
         pass

@@ -46,7 +46,12 @@ class ManufacturerRepository(
             .returning(self.model)
         )
         result = await self.db_session.execute(stmt)
-        return result.scalars().first()
+        updated = result.scalars().first()
+        if updated is None:
+            return None
+        await self.db_session.commit()
+        await self.db_session.refresh(updated)
+        return updated
 
     async def delete(self, obj_id: int) -> None:
         pass

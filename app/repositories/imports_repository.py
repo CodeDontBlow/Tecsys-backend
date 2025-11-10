@@ -2,7 +2,7 @@
 from typing import List, Optional, Type
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, selectinload
 from sqlalchemy import select, func, update
 # Local imports
 from app.model.imports import Imports
@@ -36,40 +36,40 @@ class ImportsRepository(RepositoryInterface[ImportCreate, ImportUpdate, Imports]
       """List all imports from the most recent order."""
       subq = select(func.max(Order.order_date)).scalar_subquery()
       stmt = (
-        select(Imports)  
-        .join(Imports.order) 
-        .options(
-            joinedload(Imports.manufacturer), 
-            joinedload(Imports.supplier_product).joinedload(SupplierProduct.supplier),  
-            joinedload(Imports.supplier_product).joinedload(SupplierProduct.product),  
-            joinedload(Imports.order),  
-        )
-        .where(Order.order_date == subq)  
-    )
-
+      select(Imports)
+      .join(Imports.order)
+      .options(
+          selectinload(Imports.manufacturer),
+          selectinload(Imports.supplier_product).selectinload(SupplierProduct.supplier),
+          selectinload(Imports.supplier_product).selectinload(SupplierProduct.product),
+          selectinload(Imports.order),
+      )
+        .where(Order.order_date == subq)
+      )
       result = await self._db_session.execute(stmt) 
       return result.scalars().all()
+
 
     async def list_by_order_id(self, order_id: int) -> List[Imports]:
       stmt = (
-        select(Imports)  
-        .join(Imports.order) 
-        .options(
-            joinedload(Imports.manufacturer), 
-            joinedload(Imports.supplier_product).joinedload(SupplierProduct.supplier),  
-            joinedload(Imports.supplier_product).joinedload(SupplierProduct.product),  
-            joinedload(Imports.order),  
+            select(Imports)
+            .join(Imports.order)
+            .options(
+                selectinload(Imports.manufacturer),
+                selectinload(Imports.supplier_product).selectinload(SupplierProduct.supplier),
+                selectinload(Imports.supplier_product).selectinload(SupplierProduct.product),
+                selectinload(Imports.order),
+            )
+            .where(Imports.order_id == order_id)
         )
-        .where(Imports.order_id == order_id)  
-    )
-
-      result = await self._db_session.execute(stmt) 
+      result = await self._db_session.execute(stmt)
       return result.scalars().all()
+
 
     async def get_by_id(self, obj_id: int) -> Optional[Imports]:
         pass
 
-    async def update(self, obj_id:int, obj_data: ImportUpdate) -> Imports:
+    async def update(self, obj_id: int, obj_data: ImportUpdate) -> Imports:
       stmt = (
         update(self._model)
         .where(self._model.id == obj_id)
@@ -77,7 +77,12 @@ class ImportsRepository(RepositoryInterface[ImportCreate, ImportUpdate, Imports]
         .returning(self._model)
       )
       result = await self._db_session.execute(stmt)
-      return result.scalars().first()
+      updated = result.scalars().first()
+      if updated is None:
+        return None
+      await self._db_session.commit()
+      await self._db_session.refresh(updated)
+      return updated
 
     async def delete(self, obj_id: int) -> None:
         pass
