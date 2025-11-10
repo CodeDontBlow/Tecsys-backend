@@ -59,25 +59,54 @@ def extract_from_html(html: str, target_supplier: str) -> str:
             if match:
                 disti_number = match.group(1)
                 break
+    
+    #Main Table
     table = soup.find("table")
     if not table:
-        return "table not found."
+        logger.warning("[EXTRACTOR] No table found in HTML.")
+        return json.dumps({
+            "supplier": target_supplier or "Unknown",
+            "product_part_number": "N/A",
+            "part_number_supplier": disti_number or "N/A",
+            "manufacturer": "N/A",
+            "description": "N/A"
+        }, indent=4, ensure_ascii=False)
 
     product_part_number = table.find("a")
     product_part_number = product_part_number.get_text(strip=True) if product_part_number else "N/A"
 
+
     rows = table.find_all("tr")
+    descriptions = []
+    manufacturer = "N/A"
+
+
     if len(rows) > 1:
-        columns = rows[1].find_all("td")
-        manufacturer = columns[1].get_text(strip=True) if len(columns) > 1 else "N/A"
-        
-        raw_description = columns[2].get_text(strip=True) if len(columns) > 2 else "N/A"
-        
-        description = clean_description(raw_description)
-        
+        for row in rows[1:]:  # skip header row
+            cols = row.find_all("td")
+            if len(cols) > 2:
+                text = cols[2].get_text(" ", strip=True)
+                if text and len(text) > 5:
+                    descriptions.append(text)
+            # capture manufacturer from the first valid row
+            if manufacturer == "N/A" and len(cols) > 1:
+                manufacturer = cols[1].get_text(strip=True)
+
+        description = clean_description(" ".join(descriptions))
     else:
         manufacturer = description = "N/A"
 
+    #FALLBACK (description very short)
+    if not description or len(description) < 20:
+        extra_desc = soup.find_all(
+            ["div", "span", "p"],
+            string=re.compile(r"(Cap|Res|Diode|Transistor|MOSFET|LDO|Crystal|Oscillator)", re.IGNORECASE)
+        )
+        extra_texts = [e.get_text(" ", strip=True) for e in extra_desc]
+        if extra_texts:
+            description = clean_description(" ".join(extra_texts))
+
+    #BUILD FINAL DATA
     data = {
         "supplier": found_supplier or target_supplier,
         "product_part_number": product_part_number,
@@ -87,5 +116,4 @@ def extract_from_html(html: str, target_supplier: str) -> str:
     }
 
     logger.info(f"[WEBSCRAPING-EXTRACT] Successfully extracted from {data['product_part_number']}.")
-
-    return json.dumps(data,indent=4, ensure_ascii=False)
+    return json.dumps(data, indent=4, ensure_ascii=False)
