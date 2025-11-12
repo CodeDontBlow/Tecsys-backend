@@ -1,3 +1,4 @@
+from app.model.manufacturer import Manufacturer
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import SQLAlchemyError
 from typing import List, Optional, Type
@@ -29,6 +30,9 @@ class OrderRepository(RepositoryInterface[OrderCreate, OrderUpdate, Order]):
 
     async def get_by_id(self, obj_id: int) -> Optional[Order]:
         pass
+  
+    async def list_all(self) -> List[Order]:
+         pass
 
     async def update(self, obj_data: OrderUpdate) -> Order:
         pass
