@@ -26,10 +26,7 @@ async def list_all(
         )
         if not items:
             raise HTTPException(status_code=404, detail="No imports found.")
-        return [
-            ImportResponse.model_validate(i, from_attributes=True)
-            for i in items
-        ]
+        return items
     except Exception as e:
         logger.error(f"[IMPORTS] Error in GET /imports: {e}")
         raise
