@@ -98,12 +98,17 @@ def formated_query(query: str) -> str:
     words = query.lower().replace(",", " ").replace("(", " ").replace(")", " ").split()
     detected_terms = []
 
+
+    for cat_terms in key_terms.values():
+        for term in cat_terms:
+            if term in words:
+                detected_terms.append(term)
+
     if "Cerâmico" in query:
         detected_terms.append("cerâmica")
     
     if "SMD" in query:
         detected_terms.append("montagem")
-
 
     if "Indutor" in query:
         query = query.replace("Indutor", "").strip()  
@@ -111,9 +116,19 @@ def formated_query(query: str) -> str:
         detected_terms.append("reatância")
         detected_terms.append("autoindução")
 
-    for cat_terms in key_terms.values():
-        for term in cat_terms:
-            if term in words:
-                detected_terms.append(term)
+
+    if "Schottky" in query and "Diodo" in query:
+        query = query.replace("diodo", "").strip()  
+        query = "exceto fotodiodos e diodos emissores de luz (LED)"
+     
+
+    if "supressor" in query and "Diodo" in query:
+        query = "exceto fotodiodos e diodos emissores de luz (LED)"
+        query = query.replace("diodo", "").strip()  
+        
+        
+    if "Resistor" in query and "filme" in query and "espesso" in query:
+        detected_terms.append("Resistências elétricas de filme espesso (SMD, exceto de aquecimento)")
+
 
     return " ".join(detected_terms) + " " + query
