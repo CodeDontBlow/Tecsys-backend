@@ -46,22 +46,13 @@ async def replace(id: int, import_update: ImportUpdate, db: AsyncSession = Depen
         logger.error(f"[IMPORTS] Error in PUT /imports/{id}: {e}")
         raise
 
-
-# @router.delete("/{id}", status_code=status.HTTP_200_OK)
-# async def delete(id: int, db: AsyncSession = Depends(get_session)):
-#     logger.info(f"[IMPORTS] DELETE /imports/{id}")
-#     try:
-#         result = await db.execute(select(Imports).where(Imports.id == id))
-#         item = result.scalars().first()
-
-#         if not item:
-#             logger.warning(f"[IMPORTS] Import with id={id} not found.")
-#             raise HTTPException(status_code=404, detail="Import not found.")
-
-#         await db.delete(item)
-#         await db.commit()
-#         logger.info(f"[IMPORTS] Import with id={id} deleted successfully.")
-#         return {"message": "Import deleted successfully."}
-#     except Exception as e:
-#         logger.error(f"[IMPORTS] Error in DELETE /imports/{id}: {e}")
-#         raise
+@router.delete("/order/{order_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_by_order_id(order_id: int, db: AsyncSession = Depends(get_session)):
+    logger.info(f"[IMPORTS] DELETE BY ORDER ID /imports/{order_id}")
+    try:
+        repo = ImportsRepository(db, Imports)
+        await repo.delete_by_order_id(order_id)
+        logger.info(f"[IMPORTS] Imports with order_id={order_id} deleted successfully.")
+    except Exception as e:
+        logger.error(f"[IMPORTS] Error in DELETE BY ORDER ID /imports/{order_id}: {e}")
+        raise 

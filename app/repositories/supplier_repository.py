@@ -55,3 +55,5 @@ class SupplierRepository(RepositoryInterface[SupplierCreate, SupplierUpdate, Sup
 
     async def delete(self, obj_id: int) -> None:
         pass
+    
+    
