@@ -83,6 +83,7 @@ class PipelineManager:
             await asyncio.to_thread(pdf_processer.process_enter)
 
             pdf_json = Extract_json.extract(pdf_processer.text)
+            print(pdf_json)
 
             self._supplier = pdf_json["supplier"]
             self._products = pdf_json["products"]
@@ -105,6 +106,7 @@ class PipelineManager:
             for content in results:
                 if not isinstance(content, dict):
                     continue
+                print(content)
                 part_number = content.get("product_part_number")
                 if not part_number:
                     continue
@@ -164,6 +166,7 @@ class PipelineManager:
             results = await asyncio.gather(*tasks)
 
             for i, final_desc in enumerate(results):
+                print(final_desc)
                 self._products[i]["final_description"] = final_desc[
                     self._products[i]["name"]
                 ]
@@ -191,6 +194,7 @@ class PipelineManager:
                 manufacturer_name = product.get("manufacturer") or "NÃO ENCONTRADO"
 
                 async def save_product_data(prod=product, manuf=manufacturer_name):
+                    print("erp_code", prod["erp_code"])
                     new_product = await self._product_repo.save(
                         ProductCreate(
                             final_description=prod["final_description"],
