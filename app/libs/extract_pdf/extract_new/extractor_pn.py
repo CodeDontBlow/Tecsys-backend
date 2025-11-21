@@ -14,7 +14,7 @@ from app.libs.extract_pdf.extract_new.extract_pn_from_text import extract_part_n
 
 # Caminhos base
 BASE_DIR = Path(__file__).resolve().parent
-PDF_PATH = BASE_DIR / "Pedido compras_Mouser.pdf"
+PDF_PATH = BASE_DIR / "INVOICE TECSYS.pdf"
 VECTORSTORE_PATH = BASE_DIR / "vectorstore2_invoice"
 
 # Modelo de embedding do Ollama
