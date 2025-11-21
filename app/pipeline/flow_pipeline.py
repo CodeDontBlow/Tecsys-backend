@@ -1,42 +1,54 @@
+from ast import Dict
 import asyncio
 from datetime import datetime
-import traceback
-from sqlalchemy.ext.asyncio import AsyncSession
-from app.libs.ncm import setup
-from app.libs.webscraping.exc_extractor import webscraping
-from app.libs.websocket.manager import ws_manager
-from app.model.imports import Imports
-from app.model.manufacturer import Manufacturer
-from app.model.order import Order
-from app.model.product import Product
-from app.model.supplier import Supplier
-from app.model.supplier_product import SupplierProduct
-from app.repositories.imports_repository import ImportsRepository
-from app.repositories.manufacturer_repository import ManufacturerRepository
-from app.repositories.order_repository import OrderRepository
-from app.repositories.product_repository import ProductRepository
-from app.repositories.supplier_product_repository import SupplierProductRepository
-from app.repositories.supplier_repository import SupplierRepository
-from app.schemas.imports import ImportCreate
-from app.schemas.manufacturer import ManufacturerCreate
-from app.schemas.order import OrderCreate
-from app.schemas.product import ProductCreate
-from app.schemas.supplier import SupplierCreate
-from app.schemas.supplier_product import SupplierProductCreate
-from app.libs.extract_pdf.enterPDF import EnterPDF
-from app.libs.extract_pdf.extract_json import Extract_json
 
-# from app.services.ollama_service.generate_final_desc import Generate_final_desc
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.log.logger import logger
+
+from app.libs.ncm import setup
+from app.libs.websocket.manager import ws_manager
+from app.libs.extract_pdf.enter_pdf import EnterPDF
+from app.libs.extract_pdf.extract_json import Extract_json
+from app.libs.webscraping.exc_extractor import webscraping
+from app.libs.final_description.generate_final_desc import Generate_final_desc
+
+from app.schemas import (
+    ImportCreate,
+    ManufacturerCreate,
+    OrderCreate,
+    ProductCreate,
+    SupplierCreate,
+    SupplierProductCreate,
+)
+
+from app.model import (
+    Imports,
+    Manufacturer,
+    Order,
+    Product,
+    Supplier,
+    SupplierProduct,
+)
+
+from app.repositories import (
+    ImportsRepository,
+    ManufacturerRepository,
+    OrderRepository,
+    ProductRepository,
+    SupplierRepository,
+    SupplierProductRepository,
+)
 
 
 class PipelineManager:
     def __init__(self, pdf_bytes: str, db_session: AsyncSession, order_date: datetime):
         self._pdf_bytes = pdf_bytes
         self._order_date = order_date
-        self.extracted_data = None
 
         self._supplier_repo = SupplierRepository(db_session, Supplier)
         self._product_repo = ProductRepository(db_session, Product)
+
         self._supplier_product_repo = SupplierProductRepository(
             db_session, SupplierProduct
         )
@@ -44,84 +56,125 @@ class PipelineManager:
         self._order_repo = OrderRepository(db_session, Order)
         self._manufacturer_repo = ManufacturerRepository(db_session, Manufacturer)
 
-    async def _notify(self, process: str, status: str, error=None) -> dict:
-        payload = {"process": process, "status": status, "error": error}
+    async def _notify(
+        self, process: str, status: str, error: str = None, data: dict = None
+    ) -> dict | None:
+        """Notify a process status and other additional infos"""
+        try:
+            payload = {"process": process, "status": status}
 
-        return await ws_manager.send_json(payload)
+            if error:
+                payload["error"] = error
+            elif data:
+                payload["data"] = data
+
+            return await ws_manager.send_json(payload)
+        except Exception as e:
+            logger.error(f"Error sending WebSocket notification: {e}")
+            raise
 
     async def _pdf_step(self) -> None:
-        """Executes the pdf extraction"""
-        await self._notify("pdf_extraction", "in_progress")
+        """Executes the pdf extraction process"""
+        try:
+            await self._notify("pdf_extraction", "in_progress")
 
-        processer = EnterPDF(self._pdf_bytes)
+            pdf_processer = EnterPDF(self._pdf_bytes)
 
-        await asyncio.to_thread(processer.process_enter)
+            await asyncio.to_thread(pdf_processer.process_enter)
 
-        pdf_json = Extract_json.extract(processer.text)
-        self._supplier = pdf_json["supplier"]
-        self._products = pdf_json["products"]
-        await self._notify("pdf_extraction", "success")
+            pdf_json = Extract_json.extract(pdf_processer.text)
+            print(pdf_json)
+
+            self._supplier = pdf_json["supplier"]
+            self._products = pdf_json["products"]
+            await self._notify("pdf_extraction", "success")
+        except Exception as e:
+            logger.error(f"Error to processing pdf: {e}")
+            await self._notify("pdf_extraction", "error", error=str(e))
+            raise
 
     async def _web_scrapping(self) -> None:
+        """Executes the web scrapping process"""
         try:
             await self._notify("web_scrapping", "in_progress")
-            part_numbers = [product["part_number"] for product in self._products]
+
+            products_by_pn = {p["part_number"]: p for p in self._products}
+            part_numbers = list(products_by_pn.keys())
 
             results = await webscraping(part_numbers, self._supplier)
 
             for content in results:
                 if not isinstance(content, dict):
                     continue
-                product_part_number = content.get("product_part_number")
-                if not product_part_number:
+                print(content)
+                part_number = content.get("product_part_number")
+                if not part_number:
                     continue
 
-                for product in self._products:
-                    if product["part_number"] == product_part_number:
-                        product["manufacturer"] = content.get("manufacturer", "N/A")
-                        product["manufacturer_desc"] = content.get("description", "N/A")
+                product = products_by_pn.get(part_number)
+
+                if product is None:
+                    continue
+
+                if product["part_number"] == part_number:
+                    product["manufacturer"] = content.get("manufacturer") or "N/A"
+                    product["manufacturer_desc"] = content.get("description") or "N/A"
 
             await self._notify("web_scrapping", "success")
         except Exception as e:
-            print(f"⚠️ Webscraping failed: {e}")
-            traceback.print_exc()
+            logger.error(f"Error to executes the webscrapping: {e}")
             await self._notify("web_scrapping", "failed", error=str(e))
             raise
 
     async def _get_ncm(self) -> None:
         """Executes get ncm based on descriptions"""
-        await self._notify("get_ncms", "in_progress")
+        try:
+            await self._notify("get_ncms", "in_progress")
 
-        query = "LED Verde, 2 mm SMD"
+            query_list = []
 
-        self._ncm_founded = await setup.get_ncm(query)
+            tasks = [setup.get_ncm(query) for query in query_list]
+            ncms = await asyncio.gather(*tasks)
 
-        await self._notify("get_ncms", "success")
+            await self._notify("get_ncms", "success", data=ncms)
+
+        except Exception as e:
+            logger.error(f"Error to get ncms: {e}")
+            await self._notify("get_ncms", "failed", error=str(e))
+            raise
 
     async def _get_final_description(self) -> None:
-        """Executes the final description generate"""
+        """Executes the final description generate process"""
         try:
             await self._notify("description_generate", "in_progress")
 
-            count = 0
+            descs_list = [
+                {
+                    "name": p.get("name", ""),
+                    "manufacturer_desc": p.get("manufacturer_desc", ""),
+                }
+                for p in self._products
+            ]
 
-            for product in self._products:
-                # erp_desc = {"name": product.get("name", "")}
-                # manufacturer_desc = product.get("manufacturer_desc", "")
-                # final_description = await Generate_final_desc.generate_final_desc_async(
-                #     erp_desc, manufacturer_desc
-                # )
+            tasks = [
+                Generate_final_desc.generate_final_desc_async(
+                    {d["name"]: d["name"]}, d["manufacturer_desc"]
+                )
+                for d in descs_list
+            ]
 
-                final_description = f"final_description {count}"
-                product["final_description"] = final_description
-                count += 1
+            results = await asyncio.gather(*tasks)
+
+            for i, final_desc in enumerate(results):
+                print(final_desc)
+                self._products[i]["final_description"] = final_desc[
+                    self._products[i]["name"]
+                ]
 
             await self._notify("description_generate", "success")
-
         except Exception as e:
-            print(f"⚠️ LLM failed: {e}")
-            traceback.print_exc()
-            await self._notify("LLM", "failed", error=str(e))
+            logger.error("Erro to generate final descriptions by LLM {e}")
+            await self._notify("description_generate", "failed", error=str(e))
             raise
 
     async def save_data(self) -> None:
@@ -129,46 +182,57 @@ class PipelineManager:
             new_supplier = await self._supplier_repo.save(
                 SupplierCreate(name=self._supplier)
             )
-
             new_order = await self._order_repo.save(
                 OrderCreate(order_date=self._order_date)
             )
 
-            counter = 0
+            manufacturer_cache: Dict[str, int] = {}
+
+            tasks = []
+
             for product in self._products:
-                new_product = await self._product_repo.save(
-                    ProductCreate(final_description=product["final_description"])
-                )
-                counter += 1
+                manufacturer_name = product.get("manufacturer") or "NÃO ENCONTRADO"
 
-                if "manufacturer" in product and product["manufacturer"] is not None:
-                    manufacturer_name = product["manufacturer"]
-                else:
-                    manufacturer_name = "teste"
-
-                new_manufacturer = await self._manufacturer_repo.save(
-                    ManufacturerCreate(name=manufacturer_name)
-                )
-
-                new_supplier_product = await self._supplier_product_repo.save(
-                    SupplierProductCreate(
-                        supplier_id=new_supplier.id,
-                        product_id=new_product.id,
-                        erp_description=product["name"],
+                async def save_product_data(prod=product, manuf=manufacturer_name):
+                    print("erp_code", prod["erp_code"])
+                    new_product = await self._product_repo.save(
+                        ProductCreate(
+                            final_description=prod["final_description"],
+                            erp_code=prod["erp_code"],
+                        )
                     )
-                )
 
-                await self._imports_repo.save(
-                    ImportCreate(
-                        product_part_number=product["part_number"],
-                        order_id=new_order.id,
-                        manufacturer_id=new_manufacturer.id,
-                        supplier_product_id=new_supplier_product.id,
+                    if manuf not in manufacturer_cache:
+                        new_manufacturer = await self._manufacturer_repo.save(
+                            ManufacturerCreate(name=manufacturer_name)
+                        )
+                        manufacturer_cache[manuf] = new_manufacturer.id
+
+                    manufacturer_id = manufacturer_cache[manufacturer_name]
+
+                    new_supplier_product = await self._supplier_product_repo.save(
+                        SupplierProductCreate(
+                            supplier_id=new_supplier.id,
+                            product_id=new_product.id,
+                            erp_description=product["name"],
+                        )
                     )
-                )
 
+                    await self._imports_repo.save(
+                        ImportCreate(
+                            product_part_number=product["part_number"],
+                            order_id=new_order.id,
+                            manufacturer_id=manufacturer_id,
+                            supplier_product_id=new_supplier_product.id,
+                        )
+                    )
+
+                tasks.append(save_product_data())
+
+            await asyncio.gather(*tasks)
         except Exception as e:
-            print(f"Error on save data: {e}")
+            logger.error(f"Error to save data on database: {e}")
+            await self._notify("save_on_database", "failed", error=str(e))
             raise
 
     async def run(self) -> None:
