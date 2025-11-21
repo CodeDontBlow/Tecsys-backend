@@ -10,17 +10,15 @@ from langchain.embeddings.base import Embeddings
 from langchain_community.vectorstores import Chroma
 
 from app.log.logger import logger  # mantém o seu logger
+from app.libs.extract_pdf.extract_new.extract_pn_from_text import extract_part_numbers
 
-
-# Caminhos base (ajusta se quiser)
+# Caminhos base
 BASE_DIR = Path(__file__).resolve().parent
-PDF_PATH = BASE_DIR / "INVOICE TECSYS.pdf"
+PDF_PATH = BASE_DIR / "Pedido compras_Mouser.pdf"
 VECTORSTORE_PATH = BASE_DIR / "vectorstore2_invoice"
 
 # Modelo de embedding do Ollama
-# Use um modelo que você REALMENTE tenha no `ollama list`,
-# por exemplo: "qwen3-embedding:0.6b" ou "nomic-embed-text"
-EMBEDDING_MODEL = "qwen3-embedding:0.6b"  # troque aqui se quiser
+EMBEDDING_MODEL = "qwen3-embedding:0.6b"
 OLLAMA_URL = "http://localhost:11434"
 TIMEOUT = 120
 
@@ -77,6 +75,11 @@ class InvoiceChromaDBManager:
             search_type="similarity",
             search_kwargs={"k": 20},
         )
+
+        # também deixo o texto bruto disponível para varredura direta
+        self.pages = PyPDFLoader(str(PDF_PATH)).load()
+        self.full_text = "\n\n".join(doc.page_content for doc in self.pages)
+
         logger.info("[CHROMADB-PDF] Ready")
 
     def _load_or_create_vectorstore(self):
@@ -100,16 +103,16 @@ class InvoiceChromaDBManager:
         logger.info(f"[CHROMADB-PDF] Loaded {len(pages)} pages")
 
         splitter = RecursiveCharacterTextSplitter(
-            chunk_size=150,
-            chunk_overlap=50,
+            chunk_size=500,
+            chunk_overlap=80,
             length_function=len,
-            separators=["\n\n", "\n", "PN:", " - ", ":", "PN: "],
+            separators=["\n\n", "\n", "\t"],
         )
 
         chunks = splitter.split_documents(pages)
         logger.info(f"[CHROMADB-PDF] Produced {len(chunks)} chunks")
 
-        # Deduplicar chunks
+        # Deduplicar chunks pelo conteúdo
         unique = {}
         for doc in chunks:
             uid = str(uuid.uuid5(uuid.NAMESPACE_DNS, doc.page_content))
@@ -120,13 +123,10 @@ class InvoiceChromaDBManager:
 
         logger.info(f"[CHROMADB-PDF] Deduplicated to {len(texts)} chunks")
 
-        # Criar embedder
-        embedder = self.embedding_function
-
-        # Criar banco vazio
+        # Criar banco vazio com embedder customizado
         store = Chroma(
             persist_directory=str(VECTORSTORE_PATH),
-            embedding_function=embedder,   # AQUI funciona
+            embedding_function=self.embedding_function,
         )
 
         # Inserir textos + embeddings
@@ -136,6 +136,7 @@ class InvoiceChromaDBManager:
         return store
 
     def search_parts(self, query: str = "PN:") -> List[str]:
+        """Busca chunks similares à query (para debug / inspeção)."""
         try:
             logger.info(f"[CHROMADB-PDF] Searching: {query}")
             docs = self.retriever.invoke(query)
@@ -144,24 +145,21 @@ class InvoiceChromaDBManager:
             logger.error(f"[CHROMADB-PDF] Search error: {e}")
             return []
 
-    def extract_part_numbers(self, query: str = "PN:") -> List[str]:
-        texts = self.search_parts(query)
+    def _is_valid_pn(self, pn: str) -> bool:
+        """Heurística simples para filtrar lixo."""
+        if len(pn) < 4:
+            return False
 
-        pn_regex = r"PN[:\s]*([A-Za-z0-9][A-Za-z0-9\-_.]{2,})"   # <<<< AQUI!
+        blacklist = {
+            "DESC", "ITEM", "MFR", "SCHEDULE", "COO",
+            "LOT", "DATE", "PAGE", "TOTAL", "NWT", "GWT",
+            "BOX", "NET", "EXWORKS", "WORKS",
+        }
 
-        pns: List[str] = []
-        for text in texts:
-            matches = re.findall(pn_regex, text)
-            pns.extend(matches)
+        if pn.upper() in blacklist:
+            return False
 
-        unique = []
-        for pn in pns:
-            if pn not in unique:
-                unique.append(pn)
-
-        return unique
-
-
+        return True
 
 if __name__ == "__main__":
     manager = InvoiceChromaDBManager()
@@ -173,6 +171,6 @@ if __name__ == "__main__":
         print(part)
 
     print("\n=== PART NUMBERS EXTRAÍDOS ===")
-    pns = manager.extract_part_numbers("PN:")
+    pns = extract_part_numbers(manager.full_text)
     for pn in pns:
         print("-", pn)
