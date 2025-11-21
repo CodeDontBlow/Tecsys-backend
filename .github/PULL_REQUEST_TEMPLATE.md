@@ -1,43 +1,49 @@
-# Template de Pull Request
-
+# Nome do pull request
 <!--- Forneça um resumo geral das suas alterações no título acima -->
 
-## Tipo de Pull Request
 
-- [ ] Correção de Bug (Bugfix)
-- [ ] Nova Funcionalidade (Feature)
-- [ ] Atualização de estilo de código (formatação, renomeação)
-- [ ] Refatoração (sem alterações funcionais, sem mudanças na API)
-- [ ] Alterações relacionadas à construção (Build)
-- [ ] Alterações de documentação
-- [ ] Outro (descreva):
+## Tipo de Pull Request:
 
-#### Código ta task: 
+<!-- - [] Correção de Bug (Bugfix) -->
+<!-- - [] Nova Funcionalidade (Feature) -->
+<!-- - [] Melhoria de Performance (Performance Improvement) -->
+<!-- - [] Refatoração (sem alterações funcionais) -->
+<!-- - [] Atualização de Dependências (Dependency Update) -->
+<!-- - [] Documentação (Documentation) -->
+<!-- - [] Estilo/Formatação (Code Style) -->
+<!-- - [] Testes (Tests) -->
+<!-- - [] Configuração/DevOps (CI/CD, Infrastructure) -->
+<!-- - [] Outro (descreva abaixo): -->
+
+## Referência da Task
+
+**Jira/Ticket:** [LINK_OU_CODIGO_DA_TASK]
+
+## Descrição das Alterações - Changelog
+<!-- Descreva resumidamente o que foi feito utilizando bullet points -->
+-
+-
+-
+-
 
 
+## Instruções de Teste
 
-## O que foi feito nesta branch? - Changelog
-<!-- Descreva resumidamente as principais alterações implementadas nesta branch -->
-
-
-
-## Instruções de Como Testar
-<!-- Forneça passos claros e detalhados para testar as alterações -->
-
-1. 
+**Passos para testar:**
+1. teste
 2. 
+3. 
 
+**Resultado esperado:**
+- xyz
 
-## Quem poderá testar?
-<!-- Liste pelo menos 3 pessoas que devem testar estas alterações -->
+## Reviewers Recomendados
+<!-- motivos podem ser genéricos, como contextualização do pr e alinhamento de features novas -->
+1. @ - Motivo:
+2. @ - Motivo:
+3. @ - Motivo:
 
-1. **Nome:** - **Função:** - **Motivo:**
-2. **Nome:** - **Função:** - **Motivo:**
-3. **Nome:** - **Função:** - **Motivo:**
+## Observações
 
-<!-- Caso necessário: -->
-## Informações Adicionais
-<!-- Qualquer outra informação importante para este PR, como screenshots de como o componente/codigo ficou antes e depois das alterações -->
-
-**Observações Adicionais:** 
-[Adicione quaisquer observações ou considerações importantes aqui]
+<!-- Adicione observações importantes ou dependências -->
+<!-- Observações essas que podem ser futuras features ou problemas durante o desenvolvimento que merecem atenção -->

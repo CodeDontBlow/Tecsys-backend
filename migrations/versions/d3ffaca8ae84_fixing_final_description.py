@@ -1,8 +1,8 @@
-"""initial tables
+"""fixing_final_description
 
-Revision ID: 07d94313683a
+Revision ID: d3ffaca8ae84
 Revises: 
-Create Date: 2025-10-15 21:53:55.322253
+Create Date: 2025-10-30 16:37:52.303360
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '07d94313683a'
+revision: str = 'd3ffaca8ae84'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -24,24 +24,24 @@ def upgrade() -> None:
     op.create_table('manufacturers',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('name', sa.String(length=100), nullable=False),
-    sa.Column('address', sa.String(length=150), nullable=False),
-    sa.Column('origin_country', sa.String(length=50), nullable=False),
+    sa.Column('address', sa.String(length=150), nullable=True),
+    sa.Column('origin_country', sa.String(length=50), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('orders',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('order_date', sa.Date(), nullable=False),
+    sa.Column('order_date', sa.DateTime(timezone=True), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('products',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('ncm', sa.String(length=10), nullable=False),
-    sa.Column('final_description', sa.String(length=300), nullable=False),
+    sa.Column('ncm', sa.String(length=10), nullable=True),
+    sa.Column('final_description', sa.String(), nullable=False),
+    sa.Column('erp_code', sa.String(), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('suppliers',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('part_number', sa.String(length=20), nullable=True),
     sa.Column('name', sa.String(length=100), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
@@ -56,7 +56,7 @@ def upgrade() -> None:
     )
     op.create_table('imports',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('product_part_number', sa.String(length=20), nullable=False),
+    sa.Column('product_part_number', sa.String(length=30), nullable=False),
     sa.Column('order_id', sa.Integer(), nullable=False),
     sa.Column('manufacturer_id', sa.Integer(), nullable=False),
     sa.Column('supplier_product_id', sa.Integer(), nullable=False),
