@@ -1,11 +1,11 @@
 import uuid
 import requests
-from typing import List
-from langchain_community.document_loaders import PyPDFLoader
+from typing import List 
+from langchain_community.document_loaders.pdf import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain.embeddings.base import Embeddings
-from langchain_community.vectorstores import Chroma
-import streamlit as st
+from langchain.embeddings.base import Embeddings 
+from langchain_community.vectorstores import Chroma 
+import streamlit as st 
 import pandas as pd
 from app.log.logger import logger
 
@@ -13,7 +13,7 @@ VECTORSTORE_PATH = "app/libs/extract_pdf/extract_new/vectorstore2_invoice"
 EMBEDDING_MODEL = "nomic-embed-text"
 OLLAMA_URL = "http://localhost:11434"
 TIMEOUT = 120
-PDF_PATH = "app/libs/extract_pdf/extract_new/INVOICE TECSYS.pdf"
+PDF_PATH = "./app/libs/extract_pdf/extract_new/INVOICE TECSYS.pdf"
 
 
 class CustomOllamaEmbeddingFunction(Embeddings):
