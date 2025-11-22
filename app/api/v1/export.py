@@ -7,7 +7,7 @@ import io
 from openpyxl import Workbook
 
 from app.core.dependencies import DatabaseDependency
-from app.model import Product, SupplierProduct, Imports, Manufacturer
+from app.model import Product, SupplierProduct, Imports, Manufacturer, Order
 
 router = APIRouter()
 
@@ -30,7 +30,17 @@ async def export_items(
 
     """
 
+    # Determine last order
+    last_order_stmt = select(Order).order_by(Order.id.desc()).limit(1)
+    last_order_res = await db.execute(last_order_stmt)
+    last_order = last_order_res.scalars().first()
+
+    # If there is no order, return empty result
+    if not last_order:
+        return {"data": [], "csv": "série;codigo erp; descrição no sistema; descrição para di; ncm; fabricante;\n"}
+
     # Creates a select statement with joins: product -> supplier_product -> imports -> manufacturer
+    # and filters imports by the last order id
     stmt = (
         select(
             Product.erp_code,
@@ -42,6 +52,7 @@ async def export_items(
         )
         .join(SupplierProduct, Product.id == SupplierProduct.product_id)
         .join(Imports, SupplierProduct.id == Imports.supplier_product_id)
+        .where(Imports.order_id == last_order.id)
         .join(Manufacturer, Imports.manufacturer_id == Manufacturer.id)
     )
 
