@@ -188,48 +188,41 @@ class PipelineManager:
 
             manufacturer_cache: Dict[str, int] = {}
 
-            tasks = []
-
             for product in self._products:
                 manufacturer_name = product.get("manufacturer") or "NÃO ENCONTRADO"
 
-                async def save_product_data(prod=product, manuf=manufacturer_name):
-                    print("erp_code", prod["erp_code"])
-                    new_product = await self._product_repo.save(
-                        ProductCreate(
-                            final_description=prod["final_description"],
-                            erp_code=prod["erp_code"],
-                        )
+                print("erp_code", product["erp_code"])
+                new_product = await self._product_repo.save(
+                    ProductCreate(
+                        final_description=product.get("final_description"),
+                        erp_code=product["erp_code"],
                     )
+                )
 
-                    if manuf not in manufacturer_cache:
-                        new_manufacturer = await self._manufacturer_repo.save(
-                            ManufacturerCreate(name=manufacturer_name)
-                        )
-                        manufacturer_cache[manuf] = new_manufacturer.id
-
-                    manufacturer_id = manufacturer_cache[manufacturer_name]
-
-                    new_supplier_product = await self._supplier_product_repo.save(
-                        SupplierProductCreate(
-                            supplier_id=new_supplier.id,
-                            product_id=new_product.id,
-                            erp_description=product["name"],
-                        )
+                if manufacturer_name not in manufacturer_cache:
+                    new_manufacturer = await self._manufacturer_repo.save(
+                        ManufacturerCreate(name=manufacturer_name)
                     )
+                    manufacturer_cache[manufacturer_name] = new_manufacturer.id
 
-                    await self._imports_repo.save(
-                        ImportCreate(
-                            product_part_number=product["part_number"],
-                            order_id=new_order.id,
-                            manufacturer_id=manufacturer_id,
-                            supplier_product_id=new_supplier_product.id,
-                        )
+                manufacturer_id = manufacturer_cache[manufacturer_name]
+
+                new_supplier_product = await self._supplier_product_repo.save(
+                    SupplierProductCreate(
+                        supplier_id=new_supplier.id,
+                        product_id=new_product.id,
+                        erp_description=product["name"],
                     )
+                )
 
-                tasks.append(save_product_data())
-
-            await asyncio.gather(*tasks)
+                await self._imports_repo.save(
+                    ImportCreate(
+                        product_part_number=product["part_number"],
+                        order_id=new_order.id,
+                        manufacturer_id=manufacturer_id,
+                        supplier_product_id=new_supplier_product.id,
+                    )
+                )
         except Exception as e:
             logger.error(f"Error to save data on database: {e}")
             await self._notify("save_on_database", "failed", error=str(e))
