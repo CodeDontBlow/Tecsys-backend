@@ -91,6 +91,18 @@ def extract_from_html(html: str, target_supplier: str) -> str:
             # capture manufacturer from the first valid row
             if manufacturer == "N/A" and len(cols) > 1:
                 manufacturer = cols[1].get_text(strip=True)
+                
+            # Fallback to ensure a manufacturer is always assigned
+            if manufacturer == "N/A" and len(cols) > 0:
+                candidate_manufacturer = cols[0].get_text(strip=True)
+
+                if candidate_manufacturer and not any(char.isdigit() for char in candidate_manufacturer):
+                    manufacturer = candidate_manufacturer
+                else:
+                    manufacturer = "Unknown Manufacturer"
+
+            if manufacturer == "N/A" or manufacturer == "":
+                manufacturer = "Unknown Manufacturer"
 
         description = clean_description(" ".join(descriptions))
     else:
