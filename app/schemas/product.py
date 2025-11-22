@@ -65,5 +65,7 @@ class ProductUpdate(ProductBase):
 
 class ProductResponse(BaseModel):
     id: int
-    description_di: str = Field(alias="final_description")
+    ncm: str | None
+    final_description: str
     erp_code: str
+

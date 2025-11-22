@@ -1,3 +1,4 @@
+from app.schemas.product import ProductCreate, ProductUpdate
 import pytest
 
 from app.model.supplier import Supplier
@@ -31,3 +32,24 @@ async def test_save_supplier_must_be_success(
     assert new_supplier.id is not None
     assert isinstance(new_supplier, Supplier)
     assert new_supplier.name == create_supplier_instance.name
+
+
+@pytest.mark.asyncio
+async def test_update_supplier_must_be_success(
+    supplier_repository: RepositoryInterface[SupplierCreate, SupplierUpdate, Supplier],
+    create_supplier_instance: SupplierCreate,
+) -> None:  
+    new_supplier = await supplier_repository.save(create_supplier_instance)
+
+    update_data = SupplierUpdate(
+        name="Updated Supplier B"
+    )
+
+    updated_supplier = await supplier_repository.update(
+        new_supplier.id, update_data
+    )
+
+    assert updated_supplier is not None
+    assert updated_supplier.id == new_supplier.id
+    assert updated_supplier.name == "Updated Supplier B"
+    assert updated_supplier.name != create_supplier_instance.name

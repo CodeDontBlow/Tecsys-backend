@@ -77,3 +77,7 @@ class SupplierProductResponse(BaseModel):
     erp_description: str
     supplier: SupplierResponse
     product: ProductResponse
+
+class SupplierProductUpdateResponse(BaseModel):
+    id: int
+    erp_description: str

@@ -14,7 +14,7 @@ class SupplierProduct(Base):
     supplier_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("suppliers.id"), nullable=False
     )
-    product_id: Mapped[str] = mapped_column(
+    product_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("products.id"), nullable=False
     )
     erp_description: Mapped[str] = mapped_column(String(255), nullable=True)
@@ -22,6 +22,7 @@ class SupplierProduct(Base):
     imports = relationship("Imports", back_populates="supplier_product")
     product = relationship("Product", back_populates="supplier_product") 
     supplier = relationship("Supplier", back_populates="supplier_product")
+    
 
     # supplyer: Mapped["Supplyer"] = relationship("Supplyer")
     # product: Mapped["Product"] = relationship("Product")
