@@ -108,3 +108,150 @@ async def test_create_import_must_be_success(
     assert new_import.order_id == create_import_instance.order_id
     assert new_import.manufacturer_id == create_import_instance.manufacturer_id
     assert new_import.supplier_product_id == create_import_instance.supplier_product_id
+
+
+@pytest.mark.asyncio
+async def test_list_all_imports_must_be_sucess(
+    import_repository: RepositoryInterface[ImportCreate, ImportUpdate, Imports],
+    create_import_instance: ImportCreate,
+) -> None:
+    await import_repository.save(create_import_instance)
+
+    imports_list = await import_repository.list_all()
+
+    assert isinstance(imports_list, list)
+    assert len(imports_list) > 0
+    for import_created in imports_list:
+      assert isinstance(import_created, Imports)
+
+@pytest.mark.asyncio
+async def test_list_all_imports_must_return_last(
+        import_repository: RepositoryInterface[ImportCreate, ImportUpdate, Imports],
+        create_import_instance: ImportCreate,
+        repository_factory,
+) -> None:
+
+    order_repo = repository_factory(Order, OrderRepository)
+
+    new_order = await order_repo.save(
+        OrderCreate(
+            order_date=datetime.datetime.fromisoformat("2023-10-05T14:50:00.000Z")
+        )
+    )
+    create_import_instance_recent = ImportCreate(
+        product_part_number="54321-XYZ",
+        order_id=new_order.id,
+        manufacturer_id=create_import_instance.manufacturer_id,
+        supplier_product_id=create_import_instance.supplier_product_id
+      )
+    
+    create_import_instance_recent_2 = ImportCreate(
+        product_part_number="99999-DEF",
+        order_id=new_order.id,
+        manufacturer_id=create_import_instance.manufacturer_id,
+        supplier_product_id=create_import_instance.supplier_product_id
+      )
+
+
+    await import_repository.save(create_import_instance)
+
+ 
+    await import_repository.save(create_import_instance_recent)
+    
+
+    await import_repository.save(create_import_instance_recent_2)
+
+    imports_list = await import_repository.list_all()
+    assert isinstance(imports_list, list)
+    assert len(imports_list) == 2 
+
+
+    for import_item in imports_list:
+        assert import_item.order_id == new_order.id
+
+@pytest.mark.asyncio
+async def test_list_by_order_id_must_return_all_imports_from_specific_order(
+    import_repository: RepositoryInterface[ImportCreate, ImportUpdate, Imports],
+    create_import_instance: ImportCreate,
+    repository_factory,
+) -> None:
+
+    order_repo = repository_factory(Order, OrderRepository)
+    
+
+    order_1 = await order_repo.save(
+        OrderCreate(
+            order_date=datetime.datetime.fromisoformat("2023-10-05T14:48:00.000Z")
+        )
+    )
+    
+    order_2 = await order_repo.save(
+        OrderCreate(
+            order_date=datetime.datetime.fromisoformat("2023-10-05T14:50:00.000Z")
+        )
+    )
+
+    import_1_order_1 = ImportCreate(
+        product_part_number="11111-AAA",
+        order_id=order_1.id,
+        manufacturer_id=create_import_instance.manufacturer_id,
+        supplier_product_id=create_import_instance.supplier_product_id
+    )
+    
+    import_2_order_1 = ImportCreate(
+        product_part_number="22222-BBB",
+        order_id=order_1.id,
+        manufacturer_id=create_import_instance.manufacturer_id,
+        supplier_product_id=create_import_instance.supplier_product_id
+    )
+    
+    import_1_order_2 = ImportCreate(
+        product_part_number="33333-CCC",
+        order_id=order_2.id,
+        manufacturer_id=create_import_instance.manufacturer_id,
+        supplier_product_id=create_import_instance.supplier_product_id
+    )
+    
+
+    await import_repository.save(import_1_order_1)
+    await import_repository.save(import_2_order_1)
+    await import_repository.save(import_1_order_2)
+    
+
+    imports_order_1 = await import_repository.list_by_order_id(order_1.id)
+
+    assert isinstance(imports_order_1, list)
+    assert len(imports_order_1) == 2
+
+    for import_item in imports_order_1:
+        assert import_item.order_id == order_1.id
+    imports_order_2 = await import_repository.list_by_order_id(order_2.id)
+    
+    assert isinstance(imports_order_2, list)
+    assert len(imports_order_2) == 1
+    assert imports_order_2[0].order_id == order_2.id
+
+
+@pytest.mark.asyncio
+async def test_update_import_must_be_sucess(
+    import_repository: RepositoryInterface[ImportCreate, ImportUpdate, Imports],
+    create_import_instance: ImportCreate,
+) -> None:
+
+    new_import = await import_repository.save(create_import_instance)
+
+    update_data = ImportUpdate(
+        product_part_number="UPDATED-12345"
+    )
+
+    updated_import = await import_repository.update(
+        new_import.id, update_data
+    )
+
+    assert updated_import is not None
+    assert updated_import.id == new_import.id
+    assert updated_import.product_part_number == "UPDATED-12345"
+    assert updated_import.order_id == new_import.order_id
+    assert updated_import.manufacturer_id == new_import.manufacturer_id
+    assert updated_import.supplier_product_id == new_import.supplier_product_id       
+
