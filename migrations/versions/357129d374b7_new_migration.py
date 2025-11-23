@@ -1,8 +1,8 @@
-"""new_migration
+"""new migration
 
-Revision ID: 909b787cae6f
+Revision ID: 357129d374b7
 Revises: 
-Create Date: 2025-10-23 21:27:00.673114
+Create Date: 2025-11-18 16:28:32.055155
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '909b787cae6f'
+revision: str = '357129d374b7'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -24,19 +24,20 @@ def upgrade() -> None:
     op.create_table('manufacturers',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('name', sa.String(length=100), nullable=False),
-    sa.Column('address', sa.String(length=150), nullable=False),
-    sa.Column('origin_country', sa.String(length=50), nullable=False),
+    sa.Column('address', sa.String(length=150), nullable=True),
+    sa.Column('origin_country', sa.String(length=50), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('orders',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('order_date', sa.Date(), nullable=False),
+    sa.Column('order_date', sa.DateTime(timezone=True), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('products',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('ncm', sa.String(length=10), nullable=True),
-    sa.Column('final_description', sa.String(length=300), nullable=False),
+    sa.Column('final_description', sa.String(), nullable=False),
+    sa.Column('erp_code', sa.String(), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('suppliers',
@@ -46,7 +47,6 @@ def upgrade() -> None:
     )
     op.create_table('supplier_products',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('part_number', sa.String(length=20), nullable=True),
     sa.Column('supplier_id', sa.Integer(), nullable=False),
     sa.Column('product_id', sa.Integer(), nullable=False),
     sa.Column('erp_description', sa.String(length=255), nullable=True),
@@ -56,7 +56,7 @@ def upgrade() -> None:
     )
     op.create_table('imports',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('product_part_number', sa.String(length=20), nullable=False),
+    sa.Column('product_part_number', sa.String(length=30), nullable=False),
     sa.Column('order_id', sa.Integer(), nullable=False),
     sa.Column('manufacturer_id', sa.Integer(), nullable=False),
     sa.Column('supplier_product_id', sa.Integer(), nullable=False),
