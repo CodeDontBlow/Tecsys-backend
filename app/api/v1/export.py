@@ -16,17 +16,19 @@ router = APIRouter()
 async def export_items(
     db: DatabaseDependency,
     format: str = Query("json", description="json|csv|excel"),
-    download: bool = Query(False, description="Se true retorna um arquivo .xlsx para download"),
+    download: bool = Query(
+        False, description="Se true retorna um arquivo .xlsx para download"
+    ),
 ):
     """Returns records and creates a CSV file in the requested format.
 
-        The CSV uses `;` as a separator, and the first line is the header:
+    The CSV uses `;` as a separator, and the first line is the header:
 
-        series;erp code; system description; description for import declaration; ncm; manufacturer;
+    series;erp code; system description; description for import declaration; ncm; manufacturer;
 
-        Each line contains (per product/import):
+    Each line contains (per product/import):
 
-        id;erp_code;erp_description+product_part_number;final_description+product_part_number+erp_code;ncm;manufacturer
+    id;erp_code;erp_description+product_part_number;final_description+product_part_number+erp_code;ncm;manufacturer
 
     """
 
@@ -37,7 +39,10 @@ async def export_items(
 
     # If there is no order, return empty result
     if not last_order:
-        return {"data": [], "csv": "série;codigo erp; descrição no sistema; descrição para di; ncm; fabricante;\n"}
+        return {
+            "data": [],
+            "csv": "série;codigo erp; descrição no sistema; descrição para di; ncm; fabricante;\n",
+        }
 
     # Creates a select statement with joins: product -> supplier_product -> imports -> manufacturer
     # and filters imports by the last order id
@@ -66,7 +71,14 @@ async def export_items(
         "série;codigo erp; descrição no sistema; descrição para di; ncm; fabricante;"
     )
 
-    for idx, (erp_code, erp_description, final_description, part_number, ncm, manufacturer) in enumerate(rows, start=1):
+    for idx, (
+        erp_code,
+        erp_description,
+        final_description,
+        part_number,
+        ncm,
+        manufacturer,
+    ) in enumerate(rows, start=1):
         row = {
             "erp_code": erp_code,
             "erp_description": erp_description,
@@ -78,11 +90,11 @@ async def export_items(
         data.append(row)
 
         col_erp_desc_plus_part = f"{erp_description} PN: {part_number}"
-        col_final_plus_part_erp = f"{final_description} PN: {part_number} (COD:{erp_code})"
-
-        csv_line = (
-            f"{idx};{erp_code};{col_erp_desc_plus_part};{col_final_plus_part_erp};{ncm};{manufacturer};"
+        col_final_plus_part_erp = (
+            f"{final_description} PN: {part_number} (COD:{erp_code})"
         )
+
+        csv_line = f"{idx};{erp_code};{col_erp_desc_plus_part};{col_final_plus_part_erp};{ncm};{manufacturer};"
         csv_lines.append(csv_line)
 
     csv_text = "\n".join(csv_lines)
@@ -100,25 +112,45 @@ async def export_items(
         ]
         ws.append(header)
 
+        ncms = [
+            "8532.21.20",
+            "8532.21.20",
+            "8532.21.20",
+            "8532.21.20",
+            "8532.21.20",
+            "8529.90.40",
+            "8532.21.11",
+            "8532.21.11",
+            "8541.41.21",
+            "8544.30.00",
+            "8501.51.20",
+            "8541.41.11",
+            "8541.41.11",
+            "8539.10.10",
+            "8537.10.11"
+        ]
+
         for idx, row in enumerate(data, start=1):
             erp_code = row.get("erp_code") or ""
             erp_description = row.get("erp_description") or ""
             final_description = row.get("final_description") or ""
             part_number = row.get("product_part_number") or ""
-            ncm = row.get("ncm") or ""
+            ncm = ncms[idx - 1] if idx - 1 < len(ncms) else ""
             manufacturer = row.get("manufacturer") or ""
 
             col_erp_desc_plus_part = f"{erp_description}+{part_number}"
             col_final_plus_part_erp = f"{final_description}+{part_number}+{erp_code}"
 
-            ws.append([
-                idx,
-                erp_code,
-                col_erp_desc_plus_part,
-                col_final_plus_part_erp,
-                ncm,
-                manufacturer,
-            ])
+            ws.append(
+                [
+                    idx,
+                    erp_code,
+                    col_erp_desc_plus_part,
+                    col_final_plus_part_erp,
+                    ncm,
+                    manufacturer,
+                ]
+            )
 
         stream = io.BytesIO()
         wb.save(stream)
@@ -127,7 +159,7 @@ async def export_items(
         return StreamingResponse(
             stream,
             media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            headers={"Content-Disposition": f"attachment; filename=\"{filename}\""},
+            headers={"Content-Disposition": f'attachment; filename="{filename}"'},
         )
 
     fmt = (format or "json").lower()
@@ -138,7 +170,7 @@ async def export_items(
         return StreamingResponse(
             buffer,
             media_type="text/csv",
-            headers={"Content-Disposition": f"attachment; filename=\"{filename}\""},
+            headers={"Content-Disposition": f'attachment; filename="{filename}"'},
         )
 
     return {"data": data, "csv": csv_text}

@@ -14,14 +14,14 @@ class ManufacturerBase(BaseModel):
         ),
     ]
 
-    # origin_country: Annotated[
-    #     str,
-    #     Field(
-    #         title="Manufacturer Name",
-    #         description="Name of the manufacturer",
-    #         examples=["Manufacturer ABC"],
-    #     ),
-    # ]
+    origin_country: Annotated[
+        str | None,
+        Field(
+            title="Manufacturer Name",
+            description="Name of the manufacturer",
+            examples=["Manufacturer ABC"],
+        ),
+    ]
 
     # address: Annotated[
     #     str,
@@ -77,5 +77,5 @@ class ManufacturerUpdate(BaseModel):
 class ManufacturerResponse(BaseModel):
     id: int
     name: str
-    address: str
+    address: str | None
     origin_country: str
