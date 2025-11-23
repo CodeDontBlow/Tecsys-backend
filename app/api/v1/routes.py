@@ -9,6 +9,7 @@ from .supplier import router as supplier_router
 from .ncm import router as ncm_router
 from .ws import router as ws_router
 from .description import router as description_router
+from .export import router as export_router
 
 router = APIRouter(prefix="/v1")
 router.include_router(pdf_router)
@@ -20,4 +21,6 @@ router.include_router(supplier_product_router)
 router.include_router(supplier_router)
 router.include_router(ncm_router)
 router.include_router(ws_router)
+router.include_router(description_router)
+router.include_router(export_router)
 # router.include_router(description_router)
