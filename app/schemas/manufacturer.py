@@ -78,4 +78,4 @@ class ManufacturerResponse(BaseModel):
     id: int
     name: str
     address: str | None
-    origin_country: str
+    origin_country: str | None
