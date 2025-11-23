@@ -5,7 +5,7 @@ import os
 
 from app.util.tipi import table_tipi
 from app.db.chroma_db.manager import chroma_manager
-from app.db.chroma_db.config import EMBEDDING_MODEL, DESCRIPTUM_MODEL, CAMINHO_MODELFILE 
+from app.db.chroma_db.config import EMBEDDING_MODEL, DESCRIPTUM_MODEL, TRANSLATOR_MODEL, CAMINHO_MODELFILE_DESCRIPTUM, CAMINHO_MODELFILE_TRANSLATOR
 from app.log.logger import logger
 
 def check_ollama():
@@ -91,8 +91,8 @@ def pull_ollama_model_embedding():
 
 def pull_ollama_model_description():
     try:
-        caminho = os.path.abspath(CAMINHO_MODELFILE)
-        logger.info(f"[OLLAMA] Start pulling and create model '{DESCRIPTUM_MODEL}' based on modelfile ") 
+        caminho = os.path.abspath(CAMINHO_MODELFILE_DESCRIPTUM)
+        logger.info(f"[OLLAMA] Start pulling and create model '{DESCRIPTUM_MODEL}' based on modelfile ")
         process = subprocess.Popen(
             ['ollama', 'create', 'descriptum', '-f', caminho],
             stdout=subprocess.PIPE,
@@ -111,6 +111,42 @@ def pull_ollama_model_description():
         
         if process.returncode == 0:
             logger.info(f"[OLLAMA] Success downloaded and created model '{DESCRIPTUM_MODEL}'")
+
+        
+    except subprocess.CalledProcessError as e:
+        logger.info(f"[OLLAMA] Error in command execution: {e}")
+        logger.info("[OLLAMA] Stderr:", e.stderr)
+        return None
+    except FileNotFoundError:
+        logger.info("[OLLAMA] Error: 'ollama command not found, check ollama is installed'.")
+        return None
+
+
+def pull_ollama_model_translator():
+    try:
+        caminho = os.path.abspath(CAMINHO_MODELFILE_TRANSLATOR)
+        model_tag = f"{TRANSLATOR_MODEL}:latest"
+        logger.info(f"[OLLAMA] Start pulling and create model '{model_tag}' from file: {caminho}") 
+        process = subprocess.Popen(
+            ['ollama', 'create', TRANSLATOR_MODEL, '-f', caminho],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            universal_newlines=True,
+            encoding='utf-8', 
+            bufsize=1,
+            errors='replace'
+        )
+
+        logger.info(f"[OLLAMA] Downloading model: 'qwen3:1.7b'...")
+
+        loggings_downloading_periodically(process)
+
+        process.wait()
+        
+        if process.returncode == 0:
+            logger.info(f"[OLLAMA] Success downloaded and created model '{TRANSLATOR_MODEL}'")
+        else:
+            logger.error(f"[OLLAMA] Failed to create model '{model_tag}' (code {process.returncode})")
 
         
     except subprocess.CalledProcessError as e:
