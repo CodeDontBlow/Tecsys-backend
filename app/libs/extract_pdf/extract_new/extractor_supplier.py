@@ -1,6 +1,4 @@
 import uuid
-import requests
-import re
 from typing import List
 from pathlib import Path
 
@@ -9,15 +7,16 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter #type: ignor
 from langchain.embeddings.base import Embeddings #type: ignore
 from langchain_community.vectorstores import Chroma #type: ignore
 
-from app.log.logger import logger  # mantém o seu logger
-from app.libs.extract_pdf.extract_new.extract_pn_from_text import extract_part_numbers
+from app.log.logger import logger
+from app.libs.extract_pdf.extract_new.extract_supplier import extract_supplier, SupplierInfo
 
-# Caminhos base
+
+# Caminhos base (ajusta o PDF aqui quando quiser testar outro)
 BASE_DIR = Path(__file__).resolve().parent
-PDF_PATH = BASE_DIR / "INVOICE TECSYS.pdf"
-VECTORSTORE_PATH = BASE_DIR / "vectorstore2_invoice"
+PDF_PATH = BASE_DIR / "exemplo_pdf_entrada.pdf"
+VECTORSTORE_PATH = BASE_DIR / "vectorstore_supplier"
 
-# Modelo de embedding do Ollama
+# Modelo de embedding do Ollama (apenas para debug com Chroma, se quiser)
 EMBEDDING_MODEL = "qwen3-embedding:0.6b"
 OLLAMA_URL = "http://localhost:11434"
 TIMEOUT = 120
@@ -30,57 +29,65 @@ class CustomOllamaEmbeddingFunction(Embeddings):
         self.timeout = timeout
 
     def embed_documents(self, texts: List[str]) -> List[List[float]]:
+        import requests
+
         vectors: List[List[float]] = []
         for text in texts:
             if not text or not text.strip():
-                # fallback seguro para textos vazios
                 vectors.append([0.0] * 768)
                 continue
 
-            emb = self._request_embedding(text)
-            if not emb:
-                # fallback seguro caso o Ollama falhe
-                emb = [0.0] * 768
-
-            vectors.append(emb)
+            try:
+                resp = requests.post(
+                    f"{self.url}/api/embeddings",
+                    json={"model": self.model_name, "prompt": text},
+                    timeout=self.timeout,
+                )
+                resp.raise_for_status()
+                emb = resp.json().get("embedding", [])
+                if not emb:
+                    emb = [0.0] * 768
+                vectors.append(emb)
+            except Exception as e:
+                logger.error(f"[EMBEDDING] Error: {e}")
+                vectors.append([0.0] * 768)
 
         return vectors
 
     def embed_query(self, text: str) -> List[float]:
-        return self._request_embedding(text)
+        import requests
 
-    def _request_embedding(self, text: str) -> List[float]:
         try:
-            response = requests.post(
+            resp = requests.post(
                 f"{self.url}/api/embeddings",
                 json={"model": self.model_name, "prompt": text},
                 timeout=self.timeout,
             )
-            response.raise_for_status()
-            emb = response.json().get("embedding", [])
+            resp.raise_for_status()
+            emb = resp.json().get("embedding", [])
             if not emb:
-                logger.error(f"[EMBEDDING] Empty embedding returned for text: {text[:80]!r}")
+                emb = [0.0] * 768
             return emb
         except Exception as e:
             logger.error(f"[EMBEDDING] Error: {e}")
-            return []
+            return [0.0] * 768
 
 
-class InvoiceChromaDBManager:
+class SupplierChromaManager:
     def __init__(self):
-        logger.info("[CHROMADB-PDF] Initializing")
+        logger.info("[CHROMADB-SUPPLIER] Initializing")
         self.embedding_function = CustomOllamaEmbeddingFunction(EMBEDDING_MODEL)
         self.vectorstore = self._load_or_create_vectorstore()
         self.retriever = self.vectorstore.as_retriever(
             search_type="similarity",
-            search_kwargs={"k": 20},
+            search_kwargs={"k": 10},
         )
 
-        # também deixo o texto bruto disponível para varredura direta
-        self.pages = PyPDFLoader(str(PDF_PATH)).load()
-        self.full_text = "\n\n".join(doc.page_content for doc in self.pages)
+        # texto completo do PDF (para o extractor de supplier)
+        pages = PyPDFLoader(str(PDF_PATH)).load()
+        self.full_text = "\n\n".join(doc.page_content for doc in pages)
 
-        logger.info("[CHROMADB-PDF] Ready")
+        logger.info("[CHROMADB-SUPPLIER] Ready")
 
     def _load_or_create_vectorstore(self):
         try:
@@ -89,18 +96,18 @@ class InvoiceChromaDBManager:
                 embedding_function=self.embedding_function,
             )
             if store._collection.count() > 0:
-                logger.info(f"[CHROMADB-PDF] Loaded with {store._collection.count()} documents")
+                logger.info(f"[CHROMADB-SUPPLIER] Loaded with {store._collection.count()} documents")
                 return store
         except Exception as e:
-            logger.warning(f"[CHROMADB-PDF] Failed to load: {e}")
+            logger.warning(f"[CHROMADB-SUPPLIER] Failed to load: {e}")
 
         return self._create_vectorstore_from_pdf(PDF_PATH)
 
     def _create_vectorstore_from_pdf(self, path: Path):
-        logger.info(f"[CHROMADB-PDF] Creating new store from: {path}")
+        logger.info(f"[CHROMADB-SUPPLIER] Creating new store from: {path}")
 
         pages = PyPDFLoader(str(path)).load()
-        logger.info(f"[CHROMADB-PDF] Loaded {len(pages)} pages")
+        logger.info(f"[CHROMADB-SUPPLIER] Loaded {len(pages)} pages")
 
         splitter = RecursiveCharacterTextSplitter(
             chunk_size=500,
@@ -110,9 +117,8 @@ class InvoiceChromaDBManager:
         )
 
         chunks = splitter.split_documents(pages)
-        logger.info(f"[CHROMADB-PDF] Produced {len(chunks)} chunks")
+        logger.info(f"[CHROMADB-SUPPLIER] Produced {len(chunks)} chunks")
 
-        # Deduplicar chunks pelo conteúdo
         unique = {}
         for doc in chunks:
             uid = str(uuid.uuid5(uuid.NAMESPACE_DNS, doc.page_content))
@@ -121,56 +127,43 @@ class InvoiceChromaDBManager:
         ids = list(unique.keys())
         texts = list(unique.values())
 
-        logger.info(f"[CHROMADB-PDF] Deduplicated to {len(texts)} chunks")
+        logger.info(f"[CHROMADB-SUPPLIER] Deduplicated to {len(texts)} chunks")
 
-        # Criar banco vazio com embedder customizado
         store = Chroma(
             persist_directory=str(VECTORSTORE_PATH),
             embedding_function=self.embedding_function,
         )
-
-        # Inserir textos + embeddings
         store.add_texts(texts=texts, ids=ids)
 
-        logger.info("[CHROMADB-PDF] Store created and populated")
+        logger.info("[CHROMADB-SUPPLIER] Store created and populated")
         return store
 
-    def search_parts(self, query: str = "PN:") -> List[str]:
-        """Busca chunks similares à query (para debug / inspeção)."""
+    def search_chunks(self, query: str) -> List[str]:
         try:
-            logger.info(f"[CHROMADB-PDF] Searching: {query}")
+            logger.info(f"[CHROMADB-SUPPLIER] Searching: {query}")
             docs = self.retriever.invoke(query)
             return [doc.page_content for doc in docs]
         except Exception as e:
-            logger.error(f"[CHROMADB-PDF] Search error: {e}")
+            logger.error(f"[CHROMADB-SUPPLIER] Search error: {e}")
             return []
 
-    def _is_valid_pn(self, pn: str) -> bool:
-        """Heurística simples para filtrar lixo."""
-        if len(pn) < 4:
-            return False
-
-        blacklist = {
-            "DESC", "ITEM", "MFR", "SCHEDULE", "COO",
-            "LOT", "DATE", "PAGE", "TOTAL", "NWT", "GWT",
-            "BOX", "NET", "EXWORKS", "WORKS",
-        }
-
-        if pn.upper() in blacklist:
-            return False
-
-        return True
 
 if __name__ == "__main__":
-    manager = InvoiceChromaDBManager()
+    manager = SupplierChromaManager()
 
-    print("=== CHUNKS RELEVANTES (contendo 'PN:') ===")
-    parts = manager.search_parts("PN:")
-    for i, part in enumerate(parts, 1):
-        print(f"\n[{i}] ----------------------------")
-        print(part)
+    print("=== CHUNKS RELEVANTES (debug) ===")
+    for q in ["Mouser", "Avnet", "XWORK", "TECSYS", "Electronics"]:
+        parts = manager.search_chunks(q)
+        if not parts:
+            continue
+        print(f"\n--- Query: {q} ---")
+        for i, part in enumerate(parts, 1):
+            print(f"\n[{i}] ----------------------------")
+            print(part)
 
-    print("\n=== PART NUMBERS EXTRAÍDOS ===")
-    pns = extract_part_numbers(manager.full_text)
-    for pn in pns:
-        print("-", pn)
+    print("\n=== SUPPLIER INFO EXTRAÍDO DO PDF ===\n")
+    info: SupplierInfo = extract_supplier(manager.full_text)
+    print(f"supplier_name: {info.supplier_name}")
+    print(f"supplier_address: {info.supplier_address}")
+    print(f"supplier_email: {info.supplier_email}")
+    print(f"supplier_phone: {info.supplier_phone}")
