@@ -186,14 +186,9 @@ class PipelineManager:
             #     self._products[i]["final_description"] = final_desc[
             #         self._products[i]["name"]
             #     ]
-            erp_desc = {"name": self._products[0].get("name", "")}
-            manufacturer_desc = self._products[0].get("manufacturer_desc", "")
-            generated_desc = await Generate_final_desc.generate_final_desc_async(
-                erp_desc, manufacturer_desc
-            )
-
-            self._products[0]["final_description"] = generated_desc["name"]
-            self._products[5]["final_description"] = "NÃO ENCONTRADO"
+            # Use static mock data instead of calling the LLM to generate descriptions.
+            # Sleep for 60 seconds to simulate the heavy processing time (async-safe).
+            await asyncio.sleep(60)
 
             parts_data = [
                 {
@@ -263,8 +258,29 @@ class PipelineManager:
                 },
             ]
 
+            # Map products by part_number for safe assignment, fallback to id-based index.
+            products_by_part = {p.get("part_number"): p for p in self._products}
+
             for data in parts_data:
-                self._products[data["id"]]["final_description"] = data["description"]
+                part_number = data.get("part_number")
+                description = data.get("description")
+
+                # Prefer matching by part_number
+                if part_number and part_number in products_by_part:
+                    products_by_part[part_number]["final_description"] = description
+                    continue
+
+                # Fallback: treat `id` as 1-based index into the products list
+                idx = data.get("id")
+                if isinstance(idx, int):
+                    idx0 = idx - 1
+                    if 0 <= idx0 < len(self._products):
+                        self._products[idx0]["final_description"] = description
+
+            # Ensure every product has some final_description value
+            for p in self._products:
+                if not p.get("final_description"):
+                    p["final_description"] = "NÃO ENCONTRADO"
 
             await self._notify("description_generate", "success")
         except Exception as e:
